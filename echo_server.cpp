@@ -5,7 +5,6 @@
 EchoServer::EchoServer(NginxConfig inputConfig) :
   io_service_(),
   acceptor_(io_service_),
-  socket_(io_service_),
   config_(inputConfig)
 {
   //TODO: Don't hardcode the port extraction as done below
