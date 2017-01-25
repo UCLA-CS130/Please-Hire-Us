@@ -1,3 +1,4 @@
+#include <boost/asio.hpp>
 #include "config_parser.h"
 
 class EchoServer {
@@ -6,6 +7,9 @@ class EchoServer {
    void run();
 
  private:
+   boost::asio::io_service io_service_;
+   boost::asio::ip::tcp::acceptor acceptor_;
+
    NginxConfig config_;
    int port;
 };
