@@ -22,7 +22,7 @@ EchoServer::EchoServer(NginxConfig inputConfig) :
 void EchoServer::run(){
   std::cout << "Running echo_server..." << std::endl << std::endl;
 
-  while(1){
+  for(;;){
     boost::asio::ip::tcp::socket socket(io_service_);
     acceptor_.accept(socket);
 
@@ -33,12 +33,26 @@ void EchoServer::run(){
     char req_buf[8192];
 
     std::size_t bytes_read = socket.read_some(boost::asio::buffer(req_buf), error);
+    
     if (bytes_read == 0){
       std::cout << "--------ERROR-------Boost Error Code-----" << error << std::endl;
     }
+    /*
     else {
       std::cout << "--------Request----------\n" << req_buf << std::endl;
     }
+    */
+
+    boost::asio::streambuf header;
+    std::ostream header_stream(&header);
+
+
+    header_stream << "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n";
+    boost::asio::write(socket, header);
+    boost::asio::write(socket, boost::asio::buffer(req_buf, bytes_read));
+
+    std::cout << "--------Request----------\n" << req_buf << std::endl;
+
     /*
       TODO: 
       Set response code
