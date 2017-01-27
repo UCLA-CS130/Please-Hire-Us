@@ -13,6 +13,7 @@ EchoServer::EchoServer(NginxConfig inputConfig) :
 
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
   acceptor_.open(endpoint.protocol());
+  acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
   acceptor_.bind(endpoint);
   acceptor_.listen();
 
