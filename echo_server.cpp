@@ -7,9 +7,43 @@ EchoServer::EchoServer(NginxConfig inputConfig) :
   io_service_(),
   acceptor_(io_service_),
   config_(inputConfig)
-{
- std::string str_port = config_.statements_[0]->child_block_->statements_[0]->tokens_[1];
-  port = std::stoi(str_port);
+{}
+
+bool EchoServer::extractConfig(std::string& errorMessage){
+  
+  std::string str_port = "";
+  for (auto statements : config_.statements_){
+    if (statements->tokens_[0] == "server" && statements->child_block_ != nullptr){
+      for (auto childStatement : statements->child_block_->statements_){
+        if (childStatement->tokens_[0] == "listen" || childStatement->tokens_[0] == "port"){
+          str_port = childStatement->tokens_[1];
+          port = stoi(str_port);
+	  break;
+        }
+      } 
+    }
+  }
+
+  if (str_port == ""){
+    errorMessage = "No port provided.";
+    return false; 
+  }
+  if (port < 0 || port > 65535){
+    errorMessage = "Port given was outside of acceptable range (0 - 65535).";
+    return false;
+  }
+
+  return true;
+}
+
+// Take config file and extract necessary details and init acceptor to listen
+bool EchoServer::init(std::string& errorMessage){
+
+  bool validConfig = extractConfig(errorMessage);
+  if (!validConfig){
+    return false;
+  }
+
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
   acceptor_.open(endpoint.protocol());
   acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
@@ -17,6 +51,7 @@ EchoServer::EchoServer(NginxConfig inputConfig) :
   acceptor_.listen();
 
   std::cout << "Server now listening on port: " << port << std::endl;
+  return true;
 }
 
 void EchoServer::run(){

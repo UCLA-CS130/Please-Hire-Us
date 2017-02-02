@@ -21,5 +21,12 @@ int main(int argc, char *argv[]){
   }
 
   EchoServer server(config_);
+
+  std::string errorMessage;
+  bool successInit = server.init(errorMessage);
+  if (!successInit){
+    std::cerr << "Server.init failed with error message: " << errorMessage;
+  }
+
   server.run(); 
 }
