@@ -9,12 +9,27 @@ EchoServer::EchoServer(NginxConfig inputConfig) :
   config_(inputConfig)
 {}
 
-bool EchoServer::extractConfig(){
-  //TODO: Don't hardcode extraction
-  std::string str_port = config_.statements_[0]->child_block_->statements_[0]->tokens_[1];
-  port = std::stoi(str_port);
+bool EchoServer::extractConfig(std::string& errorMessage){
+  
+  std::string str_port = "";
+  for (auto statements : config_.statements_){
+    if (statements->tokens_[0] == "server" && statements->child_block_ != nullptr){
+      for (auto childStatement : statements->child_block_->statements_){
+        if (childStatement->tokens_[0] == "listen" || childStatement->tokens_[0] == "port"){
+          str_port = childStatement->tokens_[1];
+          port = stoi(str_port);
+	  break;
+        }
+      } 
+    }
+  }
 
-  if (port < 0){
+  if (str_port == ""){
+    errorMessage = "No port provided.";
+    return false; 
+  }
+  if (port < 0 || port > 65535){
+    errorMessage = "Port given was outside of acceptable range (0 - 65535).";
     return false;
   }
 
@@ -24,9 +39,8 @@ bool EchoServer::extractConfig(){
 // Take config file and extract necessary details and init acceptor to listen
 bool EchoServer::init(std::string& errorMessage){
 
-  bool validConfig = extractConfig();
+  bool validConfig = extractConfig(errorMessage);
   if (!validConfig){
-    errorMessage = "Invalid port number given.";
     return false;
   }
 

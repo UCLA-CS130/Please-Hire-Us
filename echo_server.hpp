@@ -7,7 +7,7 @@ class EchoServer {
  public:
    EchoServer(NginxConfig inputConfig);
    bool init(std::string& errorMessage);
-   bool extractConfig();
+   bool extractConfig(std::string& errorMessage);
    void run();
 
  private:
