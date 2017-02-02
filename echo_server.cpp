@@ -1,6 +1,6 @@
 #include <boost/asio.hpp>
 #include "echo_server.hpp"
-#include "httpRequest.hpp"
+#include "httpResponse.hpp"
 
 
 EchoServer::EchoServer(NginxConfig inputConfig) :
@@ -41,7 +41,7 @@ void EchoServer::run(){
     boost::asio::streambuf header;
     std::ostream header_stream(&header);
     std::string body(req_buf);
-    HttpRequest h("200","text/plain", body);
+    HttpResponse h("200","text/plain", body);
     std::cout << h.toString();
     header_stream << h.toString();  boost::asio::write(socket, header);
   }
