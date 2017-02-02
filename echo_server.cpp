@@ -41,8 +41,6 @@ void EchoServer::run(){
     boost::asio::streambuf header;
     std::ostream header_stream(&header);
     std::string body(req_buf);
-    
-    //WHY DOES THE HEADER PART OF MESSAGE NOT SEND???
     HttpRequest h("200","text/plain", body);
     std::cout << h.toString();
     header_stream << h.toString();  boost::asio::write(socket, header);

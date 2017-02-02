@@ -6,7 +6,7 @@ class HttpRequest {
     HttpRequest(std::string responseCode, std::string contentType, std::string msgBody):responseCode(responseCode),contentType(contentType),msgBody(msgBody){};
   
     std::string toString(){
-      std::string msg = "HTTP/1.1 " + responseCode + " OK\r\nContent-Type:" + contentType + "\r\n\r\n" + msgBody + "\r\n\r\n";
+      std::string msg = "HTTP/1.1 " + responseCode + " OK\nContent-Type:" + contentType + "\n\n" + msgBody + "\n\n";
       return msg;
     }
   private:
