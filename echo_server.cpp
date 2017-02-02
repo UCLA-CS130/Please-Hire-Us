@@ -7,9 +7,29 @@ EchoServer::EchoServer(NginxConfig inputConfig) :
   io_service_(),
   acceptor_(io_service_),
   config_(inputConfig)
-{
- std::string str_port = config_.statements_[0]->child_block_->statements_[0]->tokens_[1];
+{}
+
+bool EchoServer::extractConfig(){
+  //TODO: Don't hardcode extraction
+  std::string str_port = config_.statements_[0]->child_block_->statements_[0]->tokens_[1];
   port = std::stoi(str_port);
+
+  if (port < 0){
+    return false;
+  }
+
+  return true;
+}
+
+// Take config file and extract necessary details and init acceptor to listen
+bool EchoServer::init(std::string& errorMessage){
+
+  bool validConfig = extractConfig();
+  if (!validConfig){
+    errorMessage = "Invalid port number given.";
+    return false;
+  }
+
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
   acceptor_.open(endpoint.protocol());
   acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
@@ -17,6 +37,7 @@ EchoServer::EchoServer(NginxConfig inputConfig) :
   acceptor_.listen();
 
   std::cout << "Server now listening on port: " << port << std::endl;
+  return true;
 }
 
 void EchoServer::run(){
