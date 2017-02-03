@@ -26,9 +26,11 @@ test:
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) echo_server_test.cc config_parser.cc httpResponse.cpp httpRequest.cpp echo_server.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o echo_server_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) config_parser_test.cc config_parser.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o config_parser_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) httpRequest_test.cc httpResponse.cpp httpRequest.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o httpRequest_test
+	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) httpResponse_test.cc httpResponse.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o httpResponse_test
 	./config_parser_test
 	./echo_server_test
 	./httpRequest_test
+	./httpResponse_test
 
 coverage:
 	$(CCX) $(TEST_CCXFlAGS) $(GTEST_FLAGS) -I${GTEST_DIR} -c ${GTEST_DIR}/src/gtest-all.cc 
@@ -36,12 +38,15 @@ coverage:
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) echo_server_test.cc config_parser.cc httpResponse.cpp httpRequest.cpp echo_server.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o echo_server_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) config_parser_test.cc config_parser.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o config_parser_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) httpRequest_test.cc httpResponse.cpp httpRequest.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o httpRequest_test
+	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) httpResponse_test.cc httpResponse.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o httpResponse_test
 	./config_parser_test
 	gcov -r config_parser.cc
 	./echo_server_test
 	gcov -r echo_server.cpp
 	./httpRequest_test
 	gcov -r httpRequest.cpp
+	./httpResponse_test
+	gcov -r httpResponse.cpp
 
 
 clean:

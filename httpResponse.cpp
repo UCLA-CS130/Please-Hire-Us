@@ -26,6 +26,6 @@ bool HttpResponse::checkValidity(){
 
 std::string HttpResponse::toString(){
 
-  std::string msg = "HTTP/1.1 " + responseCode + " OK\nContent-Type:" + contentType + "\n\n" + msgBody + "\n\n";
+  std::string msg = "HTTP/1.1 " + responseCode + " OK\nContent-Type: " + contentType + "\n\n" + msgBody + "\n\n";
   return msg;
 }
