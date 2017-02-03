@@ -78,6 +78,7 @@ void EchoServer::run(){
     std::ostream header_stream(&header);
     std::string body(req_buf);
     HttpResponse h("200","text/plain", body);
+    h.checkValidity();
     std::cout << h.toString();
     header_stream << h.toString();  boost::asio::write(socket, header);
   }

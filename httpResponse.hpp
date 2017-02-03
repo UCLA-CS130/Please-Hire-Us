@@ -1,9 +1,9 @@
 #include <string>
 #include <iostream>
+#include <unordered_set>
 
 std::unordered_set<std::string> ValidResponseCode{"200", "400", "404"};
 std::unordered_set<std::string> ValidContentType{"text/plain", "text/html", "text/css"};
-//enum ValidResponseCode {200, 400, 404};
 
 class HttpResponse {
   public:
