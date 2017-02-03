@@ -15,7 +15,7 @@ class HttpResponse {
       if(it == ValidResponseCode.end())
         return false;
       
-      it = ValidContentType.find(responseCode);
+      it = ValidContentType.find(contentType);
 
       if(it == ValidContentType.end())
         return false;
