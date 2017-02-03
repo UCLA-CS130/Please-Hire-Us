@@ -15,7 +15,7 @@ TEST(HandleRequestTest, validRequest){
 
   HttpRequest httpReq(valid_request);
   std::string response = httpReq.handle_request();
-  std::string full_res = "HTTP/1.1 200 OK\nContent-Type:text/plain\n\n" + valid_request + "\n\n";
+  std::string full_res = "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n" + valid_request + "\n\n";
   
   EXPECT_STREQ(full_res.c_str(), response.c_str());
 }
@@ -33,7 +33,7 @@ TEST(HandleRequestTest, validRequest2){
 
   HttpRequest httpReq(valid_request2);
   std::string response = httpReq.handle_request();
-  std::string full_res = "HTTP/1.1 200 OK\nContent-Type:text/plain\n\n" + valid_request2 + "\n\n";
+  std::string full_res = "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n" + valid_request2 + "\n\n";
   
   EXPECT_STREQ(full_res.c_str(), response.c_str());
 }
