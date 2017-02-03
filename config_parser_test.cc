@@ -18,7 +18,7 @@ class NginxConfigParserTest : public :: testing::Test {
 
 // Basic Config
 TEST_F(NginxConfigParserTest, SimpleConfig) {
-  bool success = parser_.Parse("example_config", &output_config_);
+  bool success = parser_.Parse("config", &output_config_);
   
   EXPECT_TRUE(success);
 }

@@ -1,16 +1,18 @@
-#include <string>
-#include <iostream>
+#ifndef http_response
+#define http_response
+#include<string>
+
 
 class HttpResponse {
-  public:
-    HttpResponse(std::string responseCode, std::string contentType, std::string msgBody):responseCode(responseCode),contentType(contentType),msgBody(msgBody){};
-  
-    std::string toString(){
-      std::string msg = "HTTP/1.1 " + responseCode + " OK\nContent-Type:" + contentType + "\n\n" + msgBody + "\n\n";
-      return msg;
-    }
-  private:
-    std::string responseCode;
-    std::string contentType;
-    std::string msgBody;
+public:
+  HttpResponse(std::string responseCode, std::string contentType, std::string msgBody);
+  bool checkValidity();
+  std::string toString();
+
+private:
+  std::string responseCode;
+  std::string contentType;
+  std::string msgBody;
 };
+
+#endif
