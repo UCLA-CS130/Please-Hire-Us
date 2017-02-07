@@ -6,9 +6,8 @@
 class HttpRequest {
 public:
   HttpRequest(std::string inputRequest);
-  std::string handle_request();
-  
-private:
+  void parse();
+
   std::string request;
   std::string root;
   std::string method;

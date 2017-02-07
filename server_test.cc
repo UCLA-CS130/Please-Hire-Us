@@ -1,11 +1,11 @@
 #include "gtest/gtest.h"
-#include "echo_server.hpp"
+#include "server.hpp"
 #include "config_parser.h"
 #include <string>
 
 
-// Fixture to be used for testing the EchoServer config
-class EchoServerConfigTest : public :: testing::Test {
+// Fixture to be used for testing the Server config
+class ServerConfigTest : public :: testing::Test {
   protected:
     std::string inputConfig_;
     std::string errorMessage_;
@@ -19,16 +19,19 @@ class EchoServerConfigTest : public :: testing::Test {
     }
 };
 
-TEST_F(EchoServerConfigTest, SimpleConfig){
+TEST_F(ServerConfigTest, SimpleConfig){
   inputConfig_ = 
   "server {"
+  "  path /static {"
+  "    root '/example';"
+    "}"
   "  port 3000;"
   "}";
   
   bool didParse = parse(inputConfig_, server_config_);
   ASSERT_TRUE(didParse); 
 
-  EchoServer server(server_config_); 
+  Server server(server_config_); 
   bool success = server.extractConfig(errorMessage_);
   EXPECT_TRUE(success);
   
@@ -38,7 +41,7 @@ TEST_F(EchoServerConfigTest, SimpleConfig){
 }
 
 
-TEST_F(EchoServerConfigTest, BadPort){
+TEST_F(ServerConfigTest, BadPort){
   inputConfig_ =
   "server {"
   "  port -4300;"
@@ -47,7 +50,7 @@ TEST_F(EchoServerConfigTest, BadPort){
   bool didParse = parse(inputConfig_, server_config_);
   ASSERT_TRUE(didParse);
  
-  EchoServer server(server_config_);
+  Server server(server_config_);
   bool failure = server.extractConfig(errorMessage_);
   EXPECT_FALSE(failure);
 
@@ -57,11 +60,11 @@ TEST_F(EchoServerConfigTest, BadPort){
   EXPECT_FALSE(server.init(errorMessage_));
 }
 
-TEST_F(EchoServerConfigTest, NestedConfig){
+TEST_F(ServerConfigTest, NestedConfig){
   inputConfig_ =
   "server {"
-  "  location {"
-    "/var/www/;"
+  "  path /static {"
+  "    root '/var/www/';"
   "  }"
   "  listen 8000;"
   "}";
@@ -69,7 +72,7 @@ TEST_F(EchoServerConfigTest, NestedConfig){
   bool didParse = parse(inputConfig_, server_config_);
   ASSERT_TRUE(didParse);
 
-  EchoServer server(server_config_);
+  Server server(server_config_);
   bool success = server.extractConfig(errorMessage_);
   EXPECT_TRUE(success);
 

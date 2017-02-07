@@ -2,6 +2,7 @@
 #include "server.hpp"
 #include "config_parser.h"
 #include "httpRequest.hpp"
+#include "request_handler_echo.hpp"
 
 
 Server::Server(NginxConfig inputConfig) :
@@ -102,13 +103,26 @@ void Server::run(){
     std::string errorMessage;
     
     HttpRequest httpReq(request);
-
-    std::string response = httpReq.handle_request();
-
-    std::size_t bytes_written = socket.write_some(boost::asio::buffer(response), error);
+    HttpResponse* response;
+    //httpReq.parse();
+    
+    /*TODO: 
+      1. Parse request
+      2. Init request handler based on specified path
+      3. Call handle_request()
+    */
+  
+    EchoHandler echo_handler;
+    bool handle_status = echo_handler.handle_request(httpReq, response);
+    if (!handle_status || response == NULL)
+      break;
+   
+    std::string response_str = response->toString();
+    std::size_t bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
     if (bytes_written == 0){
       std::cerr << "Http response could not be written; ERROR: " << error << std::endl;
       return;
     }
+    delete(response);
   }
 }
