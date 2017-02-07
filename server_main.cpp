@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
   std::string errorMessage;
   bool successInit = server.init(errorMessage);
   if (!successInit){
-    std::cerr << "Server.init failed with error message: " << errorMessage;
+    std::cerr << "Server.init failed with error message: " << errorMessage << std::endl;
     return -1;
   }
 

@@ -19,4 +19,5 @@ class Server {
    boost::asio::ip::tcp::acceptor acceptor_;
    NginxConfig config_;
    int port;
+   std::string static_root;
 };

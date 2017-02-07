@@ -17,14 +17,24 @@ int Server::getPort(){
 
 bool Server::extractConfig(std::string& errorMessage){
   
+  static_root = "";
   std::string str_port = "";
   for (auto statements : config_.statements_){
     if (statements->tokens_[0] == "server" && statements->child_block_ != nullptr){
       for (auto childStatement : statements->child_block_->statements_){
-        if (childStatement->tokens_[0] == "listen" || childStatement->tokens_[0] == "port"){
+	
+	//Extract port
+        if (childStatement->tokens_.size() >= 1 && (childStatement->tokens_[0] == "listen" || childStatement->tokens_[0] == "port")){
           str_port = childStatement->tokens_[1];
           port = stoi(str_port);
-	  break;
+        }
+	//Extract root dir for path /static
+        else if (childStatement->tokens_[0] == "path" && childStatement->tokens_[1] == "/static"){
+	  for (auto staticConfig : childStatement->child_block_->statements_){
+	    if (staticConfig->tokens_.size() >= 2 && staticConfig->tokens_[0] == "root"){
+	      static_root = staticConfig->tokens_[1];
+	    }
+	  }
         }
       } 
     }
@@ -34,6 +44,12 @@ bool Server::extractConfig(std::string& errorMessage){
     errorMessage = "No port provided.";
     return false; 
   }
+
+  if (static_root == ""){
+    errorMessage = "No static root dir provided in config.";
+    return false;
+  }
+
   if (port < 0 || port > 65535){
     errorMessage = "Port given was outside of acceptable range (0 - 65535).";
     return false;
@@ -63,7 +79,7 @@ bool Server::init(std::string& errorMessage){
 
 
 void Server::run(){
-  std::cout << "Running echo_server..." << std::endl << std::endl;
+  std::cout << "Running echo_server with static root " << static_root << "..." << std::endl << std::endl;
 
   for(;;){
     boost::asio::ip::tcp::socket socket(io_service_);
