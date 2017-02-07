@@ -1,21 +1,21 @@
 #include <boost/asio.hpp>
-#include "echo_server.hpp"
+#include "server.hpp"
 #include "config_parser.h"
 #include "httpRequest.hpp"
 
 
-EchoServer::EchoServer(NginxConfig inputConfig) :
+Server::Server(NginxConfig inputConfig) :
   io_service_(),
   acceptor_(io_service_),
   config_(inputConfig)
 {}
 
 
-int EchoServer::getPort(){
+int Server::getPort(){
   return port;
 }
 
-bool EchoServer::extractConfig(std::string& errorMessage){
+bool Server::extractConfig(std::string& errorMessage){
   
   static_root = "";
   std::string str_port = "";
@@ -59,7 +59,7 @@ bool EchoServer::extractConfig(std::string& errorMessage){
 }
 
 // Take config file and extract necessary details and init acceptor to listen
-bool EchoServer::init(std::string& errorMessage){
+bool Server::init(std::string& errorMessage){
 
   bool validConfig = extractConfig(errorMessage);
   if (!validConfig){
@@ -78,8 +78,9 @@ bool EchoServer::init(std::string& errorMessage){
 }
 
 
-void EchoServer::run(){
+void Server::run(){
   std::cout << "Running echo_server with static root " << static_root << "..." << std::endl << std::endl;
+
   for(;;){
     boost::asio::ip::tcp::socket socket(io_service_);
     acceptor_.accept(socket);

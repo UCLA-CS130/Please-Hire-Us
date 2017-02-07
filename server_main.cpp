@@ -1,5 +1,5 @@
 #include <iostream>
-#include "echo_server.hpp"
+#include "server.hpp"
 
 int main(int argc, char *argv[]){
   
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]){
     return -1;
   }
 
-  EchoServer server(config_);
+  Server server(config_);
 
   std::string errorMessage;
   bool successInit = server.init(errorMessage);
