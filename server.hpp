@@ -5,9 +5,9 @@
 
 const int MAX_REQUEST_SIZE = 8192;
 
-class EchoServer {
+class Server {
  public:
-   EchoServer(NginxConfig inputConfig);
+   Server(NginxConfig inputConfig);
    int getPort();
    bool init(std::string& errorMessage);
    bool extractConfig(std::string& errorMessage);
