@@ -1,9 +1,12 @@
 #include "gtest/gtest.h"
+#include "request_handler.hpp"
+#include "request_handler_echo.hpp"
 #include "httpRequest.hpp"
+#include "httpResponse.hpp"
 #include <iostream>
 
 
-TEST(HandleRequestTest, validRequest){
+TEST(EchoHandlerTest, validRequest){
   std::string valid_request = 
   "GET / HTTP/1.1"
   "Host: localhost:8080"
@@ -14,14 +17,18 @@ TEST(HandleRequestTest, validRequest){
   "Connection: keep-alive";
 
   HttpRequest httpReq(valid_request);
-  std::string response = httpReq.handle_request();
+  HttpResponse * response;
+  EchoHandler handler;
+  handler.handle_request(httpReq, response);
+  std::string response_str = response->toString();
   std::string full_res = "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n" + valid_request + "\n\n";
   
-  EXPECT_STREQ(full_res.c_str(), response.c_str());
+  EXPECT_STREQ(full_res.c_str(), response_str.c_str());
+  delete(response);
 }
 
 
-TEST(HandleRequestTest, validRequest2){
+TEST(EchoHandlerTest, validRequest2){
   std::string valid_request2 = 
   "GET /sample.txt HTTP/1.1"
   "Host: 10.97.10.103:3000"
@@ -32,8 +39,12 @@ TEST(HandleRequestTest, validRequest2){
   "Connection: keep-alive";
 
   HttpRequest httpReq(valid_request2);
-  std::string response = httpReq.handle_request();
+  HttpResponse * response;
+  EchoHandler handler;
+  handler.handle_request(httpReq, response);
+  std::string response_str = response->toString();
   std::string full_res = "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n" + valid_request2 + "\n\n";
   
-  EXPECT_STREQ(full_res.c_str(), response.c_str());
+  EXPECT_STREQ(full_res.c_str(), response_str.c_str());
+  delete(response);
 }
