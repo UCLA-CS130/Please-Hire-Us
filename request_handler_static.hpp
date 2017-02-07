@@ -7,8 +7,8 @@
 
 
 class StaticHandler : public RequestHandler {
-  StaticHandler(HttpRequest& request, std::string root_dir); 
-  virtual bool handle_request(HttpRequest& request, HttpResponse* response);
+  StaticHandler(std::string root_dir); 
+  virtual bool handle_request(const HttpRequest& request, HttpResponse* &response);
 
 private:
   std::string m_root;
