@@ -1,4 +1,5 @@
 #include <boost/asio.hpp>
+#include <boost/regex.hpp>
 #include "server.hpp"
 #include "config_parser.h"
 #include "httpRequest.hpp"
@@ -104,7 +105,10 @@ void Server::run(){
     
     HttpRequest httpReq(request);
     HttpResponse* response;
-    //httpReq.parse();
+    if (httpReq.parse()){
+      //std::cout << "Method: " << httpReq.getMethod() << std::endl;
+      //std::cout << "URL: " << httpReq.getPath() << std::endl;
+    }
     
     /*TODO: 
       1. Parse request
@@ -112,6 +116,7 @@ void Server::run(){
       3. Call handle_request()
     */
   
+    //Echo handler will be called if /ECHO/ found
     EchoHandler echo_handler;
     bool handle_status = echo_handler.handle_request(httpReq, response);
     if (!handle_status || response == NULL)

@@ -2,18 +2,22 @@
 #define http_request
 
 #include <string>
+#include <boost/asio.hpp>
 
 class HttpRequest {
 public:
   HttpRequest(std::string inputRequest);
-  void parse();
-
-  std::string request;
-  std::string root;
-  std::string method;
-  std::string URI;
-  std::string connection;
-  std::string file_type;
+  bool parse();
+  std::string getPath() const;
+  std::string getMethod() const; 
+  std::string getRequest() const;
+  bool isEcho() const;
+  
+private:
+  std::string _method;
+  std::string _path; 
+  std::string _request;
+  bool _isEcho; 
 
 };
 
