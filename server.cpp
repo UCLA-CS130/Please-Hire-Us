@@ -45,7 +45,7 @@ bool Server::extractConfig(std::string& errorMessage){
               std::string handler = childStatement->tokens_[2];
               std::string path = childStatement->tokens_[1];
               std::pair<std::string, std::string> p(handler, root);
-	      path_to_handler.emplace(path, p);
+	      path_to_handler.insert(std::make_pair(path, p));
 	    }
 	  }
         }
