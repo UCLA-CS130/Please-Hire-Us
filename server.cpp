@@ -5,6 +5,7 @@
 #include "httpRequest.hpp"
 #include "request_handler_echo.hpp"
 #include "request_handler_static.hpp"
+#include <unordered_map>
 
 
 Server::Server(NginxConfig inputConfig) :
