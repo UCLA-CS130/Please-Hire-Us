@@ -11,13 +11,13 @@ public:
   std::string getPath() const;
   std::string getMethod() const; 
   std::string getRequest() const;
-  bool isEcho() const;
-  
+  std::string getFilePath() const;
+
 private:
   std::string _method;
-  std::string _path; 
+  std::string _path;
+  std::string _filePath; 
   std::string _request;
-  bool _isEcho; 
 
 };
 

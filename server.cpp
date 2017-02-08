@@ -4,6 +4,7 @@
 #include "config_parser.h"
 #include "httpRequest.hpp"
 #include "request_handler_echo.hpp"
+#include "request_handler_static.hpp"
 
 
 Server::Server(NginxConfig inputConfig) :
@@ -19,7 +20,6 @@ int Server::getPort(){
 
 bool Server::extractConfig(std::string& errorMessage){
   
-  static_root = "";
   std::string str_port = "";
   for (auto statements : config_.statements_){
     if (statements->tokens_[0] == "server" && statements->child_block_ != nullptr){
@@ -30,11 +30,21 @@ bool Server::extractConfig(std::string& errorMessage){
           str_port = childStatement->tokens_[1];
           port = stoi(str_port);
         }
-	//Extract root dir for path /static
-        else if (childStatement->tokens_[0] == "path" && childStatement->tokens_[1] == "/static"){
-	  for (auto staticConfig : childStatement->child_block_->statements_){
-	    if (staticConfig->tokens_.size() >= 2 && staticConfig->tokens_[0] == "root"){
-	      static_root = staticConfig->tokens_[1];
+
+	/* Since the config format is:
+          path /static StaticHandler
+	  first check that there are three tokens
+          then ensure that the handler specified is valid
+          then store the path mapping to <handler,root> pair*/
+         
+        else if (childStatement->tokens_.size() == 3 && childStatement->tokens_[0] == "path" && handlers.find(childStatement->tokens_[2]) != handlers.end()){
+	  for (auto handlerConfig : childStatement->child_block_->statements_){
+	    if (handlerConfig->tokens_.size() >= 2 && handlerConfig->tokens_[0] == "root"){
+	      std::string root = handlerConfig->tokens_[1];
+              std::string handler = childStatement->tokens_[2];
+              std::string path = childStatement->tokens_[1];
+              std::pair<std::string, std::string> p(handler, root);
+	      path_to_handler.emplace(path, p);
 	    }
 	  }
         }
@@ -45,11 +55,6 @@ bool Server::extractConfig(std::string& errorMessage){
   if (str_port == ""){
     errorMessage = "No port provided.";
     return false; 
-  }
-
-  if (static_root == ""){
-    errorMessage = "No static root dir provided in config.";
-    return false;
   }
 
   if (port < 0 || port > 65535){
@@ -81,8 +86,8 @@ bool Server::init(std::string& errorMessage){
 
 
 void Server::run(){
-  std::cout << "Running echo_server with static root " << static_root << "..." << std::endl << std::endl;
-
+  std::cout << "Running echo_server... " << std::endl << std::endl;
+  
   for(;;){
     boost::asio::ip::tcp::socket socket(io_service_);
     acceptor_.accept(socket);
@@ -105,29 +110,43 @@ void Server::run(){
     
     HttpRequest httpReq(request);
     HttpResponse* response;
-    if (httpReq.parse()){
-      //std::cout << "Method: " << httpReq.getMethod() << std::endl;
-      //std::cout << "URL: " << httpReq.getPath() << std::endl;
+    if (!httpReq.parse()){
+      return; 
     }
-    
-    /*TODO: 
-      1. Parse request
-      2. Init request handler based on specified path
-      3. Call handle_request()
-    */
-  
-    //Echo handler will be called if /ECHO/ found
-    EchoHandler echo_handler;
-    bool handle_status = echo_handler.handle_request(httpReq, response);
-    if (!handle_status || response == NULL)
+
+    std::string requested_path = httpReq.getPath();
+    auto it = path_to_handler.find(requested_path);
+    if (it == path_to_handler.end())
+      _handler = new RequestHandler();
+     
+    else if (it->second.first == "EchoHandler")
+      _handler = new EchoHandler();
+
+    else if (it->second.first == "StaticHandler")
+      _handler = new StaticHandler(it->second.second);
+
+    else
+      _handler = new RequestHandler();
+
+    bool handle_status;
+    handle_status = _handler->handle_request(httpReq, response);
+
+    if (!handle_status || response == NULL){
+      std::cout << "now down here" << std::endl;
+      if (!response)
+        std::cout << "response is null " << std::endl;
       break;
-   
+   }
     std::string response_str = response->toString();
     std::size_t bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
+
     if (bytes_written == 0){
       std::cerr << "Http response could not be written; ERROR: " << error << std::endl;
       return;
     }
+
     delete(response);
+    if (_handler)
+      delete(_handler);
   }
 }
