@@ -76,5 +76,5 @@ TEST(HttpRequestTest, GetFilePath){
   HttpRequest httpReq(valid_request);
   bool success = httpReq.parse();
   std::string filepath_req = httpReq.getFilePath();
-  EXPECT_STREQ(filepath_req.c_str(), correct_path.c_str());
+  EXPECT_STREQ(filepath_req.c_str(), correct_filepath.c_str());
 }
