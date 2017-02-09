@@ -6,7 +6,5 @@ server {
   path /static2 StaticHandler {
     root /another/path/here;
   }
-  path /echo EchoHandler {
-    root TODO;
-  }
+  path /echo EchoHandler {}
 }

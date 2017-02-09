@@ -39,15 +39,16 @@ bool Server::extractConfig(std::string& errorMessage){
           then store the path mapping to <handler,root> pair*/
          
         else if (childStatement->tokens_.size() == 3 && childStatement->tokens_[0] == "path" && handlers.find(childStatement->tokens_[2]) != handlers.end()){
+          std::string handler = childStatement->tokens_[2];
+          std::string path = childStatement->tokens_[1];
+          std::string root = "";
 	  for (auto handlerConfig : childStatement->child_block_->statements_){
 	    if (handlerConfig->tokens_.size() >= 2 && handlerConfig->tokens_[0] == "root"){
-	      std::string root = handlerConfig->tokens_[1];
-              std::string handler = childStatement->tokens_[2];
-              std::string path = childStatement->tokens_[1];
-              std::pair<std::string, std::string> p(handler, root);
-	      path_to_handler.insert(std::make_pair(path, p));
-	    }
+	      root = handlerConfig->tokens_[1];
+            }
 	  }
+          std::pair<std::string, std::string> p(handler, root);
+	  path_to_handler.insert(std::make_pair(path, p));
         }
       } 
     }
