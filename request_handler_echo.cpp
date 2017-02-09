@@ -12,7 +12,7 @@ bool EchoHandler::handle_request(const HttpRequest& request, HttpResponse* &resp
   std::string response_code = "200";
   std::string content_type = "text/plain";
   
-  response = new HttpResponse(response_code, content_type, request.request);
+  response = new HttpResponse(response_code, content_type, request.getRequest());
   if (!response->checkValidity()){
     std::cerr << "Http response is invalid." << std::endl;
     response = NULL;

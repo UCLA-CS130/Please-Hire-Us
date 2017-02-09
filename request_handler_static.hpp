@@ -7,12 +7,14 @@
 
 
 class StaticHandler : public RequestHandler {
+public:
   StaticHandler(std::string root_dir); 
   virtual bool handle_request(const HttpRequest& request, HttpResponse* &response);
+  bool getMIMEType(std::string file_name);
 
 private:
-  std::string m_root;
-
+  std::string _root;
+  std::string _content_type;
 };
 
 #endif

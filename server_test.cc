@@ -22,9 +22,12 @@ class ServerConfigTest : public :: testing::Test {
 TEST_F(ServerConfigTest, SimpleConfig){
   inputConfig_ = 
   "server {"
-  "  path /static {"
+  "  path /static StaticHandler {"
   "    root '/example';"
-    "}"
+  "  }"
+  "  echo /echo EchoHandler {"
+  "    root '/fix/this';"
+  "  }"
   "  port 3000;"
   "}";
   
@@ -63,7 +66,7 @@ TEST_F(ServerConfigTest, BadPort){
 TEST_F(ServerConfigTest, NestedConfig){
   inputConfig_ =
   "server {"
-  "  path /static {"
+  "  path /static StaticHandler {"
   "    root '/var/www/';"
   "  }"
   "  listen 8000;"

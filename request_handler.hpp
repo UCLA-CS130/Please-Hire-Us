@@ -10,7 +10,8 @@
 class RequestHandler {
 public:
   RequestHandler();
-  virtual bool handle_request(const HttpRequest& request, HttpResponse* &response) = 0;
+  virtual ~RequestHandler();
+  virtual bool handle_request(const HttpRequest& request, HttpResponse* &response);
 };
 
 #endif
