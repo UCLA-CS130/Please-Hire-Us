@@ -15,10 +15,11 @@ TEST(StaticHandlerTest, validRequest){
   "Accept-Language: en-US,en;q=0.5"
   "Accept-Encoding: gzip, deflate"
   "Connection: keep-alive";
+  std::string root_dir = "/home/gil/cs130/Please-Hire-Us/";
 
   HttpRequest httpReq(valid_request);
   HttpResponse* response;
-  StaticHandler handler;
+  StaticHandler handler(root_dir);
   bool success = handler.handle_request(httpReq, response);
   
   EXPECT_TRUE(success);
@@ -26,9 +27,11 @@ TEST(StaticHandlerTest, validRequest){
 }
 
 TEST(StaticHandlerTest, validMIMEType){
-  std::string valid_filepath = "/dogs.gif"
+  std::string valid_filepath = "/dogs.gif";
+  std::string root_dir = "/home/gil/cs130/Please-Hire-Us/";
 
-  StaticHandler handler;
+
+  StaticHandler handler(root_dir);
   bool success = handler.getMIMEType(valid_filepath);
   
   EXPECT_TRUE(success);
