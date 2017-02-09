@@ -1,7 +1,7 @@
 server {
   port 8080;
   path /static StaticHandler {
-    root /home/mpgermano/CS130/Please-Hire-Us/www/;
+    root /home/gil/cs130/Please-Hire-Us/www;
   }
   path /static2 StaticHandler {
     root /another/path/here;

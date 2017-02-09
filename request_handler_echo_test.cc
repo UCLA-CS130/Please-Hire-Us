@@ -17,7 +17,7 @@ TEST(EchoHandlerTest, validRequest){
   "Connection: keep-alive";
 
   HttpRequest httpReq(valid_request);
-  HttpResponse * response;
+  HttpResponse* response;
   EchoHandler handler;
   handler.handle_request(httpReq, response);
   std::string response_str = response->toString();
@@ -39,7 +39,7 @@ TEST(EchoHandlerTest, validRequest2){
   "Connection: keep-alive";
 
   HttpRequest httpReq(valid_request2);
-  HttpResponse * response;
+  HttpResponse* response;
   EchoHandler handler;
   handler.handle_request(httpReq, response);
   std::string response_str = response->toString();
