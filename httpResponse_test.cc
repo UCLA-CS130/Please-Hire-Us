@@ -1,12 +1,12 @@
 #include "gtest/gtest.h"
+#include "httpRequest.hpp"
 #include "httpResponse.hpp"
 #include <iostream>
 
 
-TEST(CheckValidityTest, validResponse1){
-  std::string responseCode = "200";
-  std::string contentType = "text/plain";
-  std::string msgBody = "GET / HTTP/1.1"
+TEST(HttpRequestTest, ValidParseRequest){
+  std::string valid_request = 
+  "GET /static/dogs.gif HTTP/1.1"
   "Host: localhost:8080"
   "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
   "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
@@ -14,144 +14,67 @@ TEST(CheckValidityTest, validResponse1){
   "Accept-Encoding: gzip, deflate"
   "Connection: keep-alive";
 
-  HttpResponse httpRes(responseCode, contentType, msgBody);
-  bool success = httpRes.checkValidity();
-
+  HttpRequest httpReq(valid_request);
+  bool success = httpReq.parse();
   EXPECT_TRUE(success);
 }
 
-TEST(CheckValidityTest, validResponse2){
-  std::string responseCode = "400";
-  std::string contentType = "text/html";
-  std::string msgBody = "GET / HTTP/1.1"
-  "Host: localhost:8080"
-  "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
-  "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-  "Accept-Language: en-US,en;q=0.5"
-  "Accept-Encoding: gzip, deflate"
-  "Connection: keep-alive";
+TEST(HttpRequestTest, InvalidParseRequest){
+  std::string invalid_request = 
+  "/static/dogs.gif GET";
 
-  HttpResponse httpRes(responseCode, contentType, msgBody);
-  bool success = httpRes.checkValidity();
-
-  EXPECT_TRUE(success);
+  HttpRequest httpReq(invalid_request);
+  bool success = httpReq.parse();
+  EXPECT_FALSE(success);
 }
 
-TEST(CheckValidityTest, invalidResponse1){
-  std::string responseCode = "900";
-  std::string contentType = "text/plain";
-  std::string msgBody = "GET / HTTP/1.1"
+TEST(HttpRequestTest, GetMethod){
+  std::string valid_request = 
+  "GET /static/dogs.gif HTTP/1.1"
   "Host: localhost:8080"
   "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
   "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
   "Accept-Language: en-US,en;q=0.5"
   "Accept-Encoding: gzip, deflate"
   "Connection: keep-alive";
+  std::string full_method = "GET";            
 
-  HttpResponse httpRes(responseCode, contentType, msgBody);
-  bool failure = httpRes.checkValidity();
-
-  EXPECT_FALSE(failure);
+  HttpRequest httpReq(valid_request);
+  bool success = httpReq.parse();
+  std::string method_req = httpReq.getMethod();
+  EXPECT_STREQ(method_req.c_str(), full_method.c_str());
 }
 
-TEST(CheckValidityTest, invalidResponse2){
-  std::string responseCode = "200";
-  std::string contentType = "text/funky";
-  std::string msgBody = "GET / HTTP/1.1"
+TEST(HttpRequestTest, GetPath){
+  std::string valid_request = 
+  "GET /static/dogs.gif HTTP/1.1"
   "Host: localhost:8080"
   "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
   "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
   "Accept-Language: en-US,en;q=0.5"
   "Accept-Encoding: gzip, deflate"
   "Connection: keep-alive";
+  std::string correct_path = "/static";            
 
-  HttpResponse httpRes(responseCode, contentType, msgBody);
-  bool failure = httpRes.checkValidity();
-
-  EXPECT_FALSE(failure);
+  HttpRequest httpReq(valid_request);
+  bool success = httpReq.parse();
+  std::string path_req = httpReq.getPath();
+  EXPECT_STREQ(path_req.c_str(), correct_path.c_str());
 }
 
-TEST(StringValidityTest, validString1){
-  std::string responseCode = "200";
-  std::string contentType = "text/plain";
-  std::string msgBody = "GET / HTTP/1.1"
+TEST(HttpRequestTest, GetFilePath){
+  std::string valid_request = 
+  "GET /static/dogs.gif HTTP/1.1"
   "Host: localhost:8080"
   "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
   "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
   "Accept-Language: en-US,en;q=0.5"
   "Accept-Encoding: gzip, deflate"
   "Connection: keep-alive";
+  std::string correct_filepath = "/dogs.gif";            
 
-  std::string full_res = 
-  "HTTP/1.1 200 OK\n"
-  "Content-Type: text/plain\n\n"
-  "GET / HTTP/1.1"
-  "Host: localhost:8080"
-  "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
-  "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-  "Accept-Language: en-US,en;q=0.5"
-  "Accept-Encoding: gzip, deflate"
-  "Connection: keep-alive\n\n";
-
-  HttpResponse httpRes(responseCode, contentType, msgBody);
-  std::string response = httpRes.toString();
-
-  EXPECT_STREQ(full_res.c_str(), response.c_str());
-}
-
-TEST(StringValidityTest, validString2){
-  std::string responseCode = "200";
-  std::string contentType = "text/html";
-  std::string msgBody = "GET / HTTP/1.1"
-  "Host: localhost:8080"
-  "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
-  "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-  "Accept-Language: en-US,en;q=0.5"
-  "Accept-Encoding: gzip, deflate"
-  "Connection: keep-alive";
-
-  std::string full_res = 
-  "HTTP/1.1 200 OK\n"
-  "Content-Type: text/html\n\n"
-  "GET / HTTP/1.1"
-  "Host: localhost:8080"
-  "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
-  "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-  "Accept-Language: en-US,en;q=0.5"
-  "Accept-Encoding: gzip, deflate"
-  "Connection: keep-alive\n\n";
-
-  HttpResponse httpRes(responseCode, contentType, msgBody);
-  std::string response = httpRes.toString();
-
-  EXPECT_STREQ(full_res.c_str(), response.c_str());
-}
-
-// Different content type creates invalid string
-TEST(StringValidityTest, invalidString1){
-  std::string responseCode = "200";
-  std::string contentType = "text/html";
-  std::string msgBody = "GET / HTTP/1.1"
-  "Host: localhost:8080"
-  "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
-  "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-  "Accept-Language: en-US,en;q=0.5"
-  "Accept-Encoding: gzip, deflate"
-  "Connection: keep-alive";
-
-  std::string full_res = 
-  "HTTP/1.1 200 OK\n"
-  "Content-Type: text/plain\n\n"
-  "GET / HTTP/1.1"
-  "Host: localhost:8080"
-  "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
-  "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-  "Accept-Language: en-US,en;q=0.5"
-  "Accept-Encoding: gzip, deflate"
-  "Connection: keep-alive\n\n";
-
-  HttpResponse httpRes(responseCode, contentType, msgBody);
-  std::string response = httpRes.toString();
-
-  EXPECT_STRNE(full_res.c_str(), response.c_str());
+  HttpRequest httpReq(valid_request);
+  bool success = httpReq.parse();
+  std::string filepath_req = httpReq.getFilePath();
+  EXPECT_STREQ(filepath_req.c_str(), correct_filepath.c_str());
 }
