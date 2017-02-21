@@ -15,13 +15,19 @@ CXXFLAGS= -Wall -std=c++11
 #Link Flags
 LFLAGS= -lboost_system -lboost_regex
 
-SRC = server_main.cpp server.cpp httpRequest.cpp httpResponse.cpp request_handler.cpp request_handler_echo.cpp request_handler_static.cpp config_parser.cc
-DEP = server.hpp config_parser.h httpRequest.hpp httpResponse.hpp request_handler.hpp request_handler_echo.hpp request_handler_static.hpp
+SRC = server_main.cpp server.cpp request.cpp response.cpp request_handler.cpp request_handler_echo.cpp request_handler_static.cpp
+CPP_OBJ = server_main.o server.o request.o response.o request_handler_echo.o request_handler_static.o
+CC_OBJ = config_parser.o
 
 default: server
 
-server: $(DEP)
-	$(CCX) -o $@ $^ $(CXXFLAGS) $(SRC) $(LFLAGS)
+$(CPP_OBJ): %.o : %.cpp 
+	$(CCX) $(CXXFLAGS) -c -o $@ $<
+$(CC_OBJ): config_parser.cc config_parser.h
+	$(CCX) $(CXXFLAGS) -c config_parser.cc
+
+server: $(CPP_OBJ) $(CC_OBJ)
+	$(CCX) -o $@ $^ $(CXXFLAGS) $(OBJ) $(LFLAGS)
 
 test:
 	$(CCX) $(TEST_CCXFlAGS) $(GTEST_FLAGS) -I${GTEST_DIR} -c ${GTEST_DIR}/src/gtest-all.cc 
