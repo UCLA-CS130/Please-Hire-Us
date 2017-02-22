@@ -2,19 +2,16 @@
 #define static_handler
 
 #include "request_handler.hpp"
-#include "httpRequest.hpp"
-#include "httpResponse.hpp"
 
 
 class StaticHandler : public RequestHandler {
 public:
-  StaticHandler(std::string root_dir); 
-  virtual bool handle_request(const HttpRequest& request, HttpResponse* &response);
-  bool getMIMEType(std::string file_name);
+  virtual RequestHandler::Status Init(const std::string& uri_prefix, const NginxConfig& config);
+  virtual RequestHandler::Status HandleRequest(const Request& request, Response* response);
+  bool getMIMEType(const std::string& file_name, std::string * content_type);
 
 private:
   std::string _root;
-  std::string _content_type;
 };
 
 #endif

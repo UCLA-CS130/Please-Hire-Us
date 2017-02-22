@@ -1,11 +1,16 @@
 #include <boost/asio.hpp>
 #include <boost/regex.hpp>
+
 #include "server.hpp"
 #include "config_parser.h"
-#include "httpRequest.hpp"
+#include "request.hpp"
+#include "response.hpp"
 #include "request_handler_echo.hpp"
 #include "request_handler_static.hpp"
+
 #include <unordered_map>
+#include <iterator>
+#include <vector>
 
 
 Server::Server(NginxConfig inputConfig) :
@@ -22,37 +27,34 @@ int Server::getPort(){
 bool Server::extractConfig(std::string& errorMessage){
   
   std::string str_port = "";
-  for (auto statements : config_.statements_){
-    if (statements->tokens_[0] == "server" && statements->child_block_ != nullptr){
-      for (auto childStatement : statements->child_block_->statements_){
-	
-	//Extract port
-        if (childStatement->tokens_.size() >= 1 && (childStatement->tokens_[0] == "listen" || childStatement->tokens_[0] == "port")){
-          str_port = childStatement->tokens_[1];
-          port = stoi(str_port);
-        }
+  for (std::vector<std::shared_ptr<NginxConfigStatement>>::iterator it = config_.statements_.begin(); it != config_.statements_.end(); it++){ 
 
-	/* Since the config format is:
-          path /static StaticHandler
-	  first check that there are three tokens
-          then ensure that the handler specified is valid
-          then store the path mapping to <handler,root> pair*/
-         
-        else if (childStatement->tokens_.size() == 3 && childStatement->tokens_[0] == "path" && handlers.find(childStatement->tokens_[2]) != handlers.end()){
-          std::string handler = childStatement->tokens_[2];
-          std::string path = childStatement->tokens_[1];
-          std::string root = "";
-	  for (auto handlerConfig : childStatement->child_block_->statements_){
-	    if (handlerConfig->tokens_.size() >= 2 && handlerConfig->tokens_[0] == "root"){
-	      root = handlerConfig->tokens_[1];
-            }
-	  }
-          std::pair<std::string, std::string> p(handler, root);
-	  path_to_handler.insert(std::make_pair(path, p));
-        }
-      } 
+    //Extract Port 
+    if ((*it)->tokens_[0] == "port" && (*it)->tokens_.size() > 1){
+      str_port = (*it)->tokens_[1];
+      port = stoi(str_port);
     }
-  }
+ 
+    //Extract Handler and Init them with uri_prefix and NginxConfig (subconfig for that handler)   
+    else if ((*it)->tokens_.size() == 3 && (*it)->tokens_[0] == "path" && handlers.find((*it)->tokens_[2]) != handlers.end()){
+       std::string handler = (*it)->tokens_[2];
+       std::string uri_prefix = (*it)->tokens_[1];
+      
+       NginxConfig handlerConfig; 
+       if ((*it)->child_block_)
+         handlerConfig = (*(*it)->child_block_); 
+       else {
+         errorMessage = "Handler " + handler + " needs configuration blocks {}.";
+         return false;
+       }
+
+       //Add Handler to private member _handlerContainer
+       if (!addHandler(handler, uri_prefix, handlerConfig)){
+         errorMessage = "Could not add handler: " + handler + " with uri_prefix: " + uri_prefix;
+         return false;
+       }
+     }
+   } 
 
   if (str_port == ""){
     errorMessage = "No port provided.";
@@ -65,6 +67,20 @@ bool Server::extractConfig(std::string& errorMessage){
   }
 
   return true;
+}
+
+bool Server::addHandler(const std::string& handlerName, const std::string& uri_prefix, const NginxConfig& sub_config){
+    
+    if (handlerName == "EchoHandler")
+      _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new EchoHandler()));
+    else if (handlerName ==  "StaticHandler")
+      _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new StaticHandler()));
+
+    RequestHandler::Status status = _handlerContainer[uri_prefix]->Init(uri_prefix, sub_config);
+    if (status == RequestHandler::OK)
+      return true;
+    else
+      return false;
 }
 
 // Take config file and extract necessary details and init acceptor to listen
@@ -89,7 +105,7 @@ bool Server::init(std::string& errorMessage){
 
 void Server::run(){
   std::cout << "Running echo_server... " << std::endl << std::endl;
-  
+
   for(;;){
     boost::asio::ip::tcp::socket socket(io_service_);
     acceptor_.accept(socket);
@@ -107,48 +123,32 @@ void Server::run(){
       std::cout << "--------ERROR-------Boost Error Code-----" << error << std::endl;
       return;
     }
-    std::string request(req_buf);
+    std::string raw_request(req_buf);
     std::string errorMessage;
     
-    HttpRequest httpReq(request);
-    HttpResponse* response;
-    if (!httpReq.parse()){
-      return; 
+    auto httpRequest = Request::Parse(raw_request);
+    Response  * httpResponse  = new Response();;
+
+    //TODO: This extraction doesn't work with a StaticHandler path of "/"
+    std::string uri = httpRequest->uri();
+    std::size_t prefix_slash = uri.find("/", 1);
+    std::string uri_prefix = uri.substr(0, prefix_slash);
+  
+    RequestHandler::Status response_status;
+    response_status = _handlerContainer[uri_prefix]->HandleRequest((*httpRequest), httpResponse);
+         
+    //TODO: IF response_status is NOT OK, create 500 Server error response
+
+    std::size_t bytes_written;
+    if (response_status == RequestHandler::OK){ 
+      std::string response_str = httpResponse->ToString();
+      bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
     }
-
-    std::string requested_path = httpReq.getPath();
-    auto it = path_to_handler.find(requested_path);
-    if (it == path_to_handler.end())
-      _handler = new RequestHandler();
-     
-    else if (it->second.first == "EchoHandler")
-      _handler = new EchoHandler();
-
-    else if (it->second.first == "StaticHandler")
-      _handler = new StaticHandler(it->second.second);
-
-    else
-      _handler = new RequestHandler();
-
-    bool handle_status;
-    handle_status = _handler->handle_request(httpReq, response);
-
-    if (!handle_status || response == NULL){
-      std::cout << "now down here" << std::endl;
-      if (!response)
-        std::cout << "response is null " << std::endl;
-      break;
-   }
-    std::string response_str = response->toString();
-    std::size_t bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
-
     if (bytes_written == 0){
       std::cerr << "Http response could not be written; ERROR: " << error << std::endl;
       return;
     }
 
-    delete(response);
-    if (_handler)
-      delete(_handler);
+    delete(httpResponse);
   }
 }
