@@ -1,25 +1,27 @@
-#include "request_handler.hpp"
 #include "request_handler_echo.hpp"
-#include "httpRequest.hpp"
-#include "httpResponse.hpp"
+#include "response.hpp"
 #include <iostream>
 #include <memory>
 
 
 EchoHandler::EchoHandler(){}
 
-bool EchoHandler::handle_request(const HttpRequest& request, HttpResponse* &response){
-  std::string response_code = "200";
-  std::string content_type = "text/plain";
+RequestHandler::Status EchoHandler::Init(const std::string& uri_prefix, const NginxConfig& config){
+  _uri_prefix = uri_prefix;
+  _config = config;
+
+  return RequestHandler::OK;
+
+}
+
+RequestHandler::Status EchoHandler::HandleRequest(const Request& request, Response* response){
+
+  response->SetStatus(Response::OK);
+  std::string content_header_name = "Content-Type";
+  std::string content_header = "text/plain";
+
+  response->AddHeader(content_header_name, content_header);
+  response->SetBody(request.raw_request());
   
-  response = new HttpResponse(response_code, content_type, request.getRequest());
-  if (!response->checkValidity()){
-    std::cerr << "Http response is invalid." << std::endl;
-    response = NULL;
-    return false;
-  }
-  
-  if (response == NULL)
-    std::cout << "Response is null " << std::endl;
-  return true;
+  return RequestHandler::OK;
 }

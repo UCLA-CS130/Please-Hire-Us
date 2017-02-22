@@ -2,8 +2,9 @@
 #include "config_parser.h"
 #include <string>
 #include "request_handler.hpp"
-#include <unordered_map>
 #include <unordered_set>
+#include <map>
+
 
 const int MAX_REQUEST_SIZE = 8192;
 const std::unordered_set<std::string>handlers = {"EchoHandler", "StaticHandler"}; 
@@ -14,7 +15,7 @@ class Server {
    int getPort();
    bool init(std::string& errorMessage);
    bool extractConfig(std::string& errorMessage);
-   std::string handleRequest(std::string body);
+   bool addHandler(const std::string& handlerName, const std::string& uri_prefix, const NginxConfig& sub_config);
    void run();
 
  private:
@@ -22,7 +23,8 @@ class Server {
    boost::asio::ip::tcp::acceptor acceptor_;
    NginxConfig config_;
    RequestHandler* _handler;
-   std::unordered_map<std::string, std::pair<std::string, std::string>>  path_to_handler;
- 
+  
+   //Container to map uri_prefix to appropriate RequestHandler
+   std::map<std::string, std::unique_ptr<RequestHandler>> _handlerContainer;
    int port;
 };

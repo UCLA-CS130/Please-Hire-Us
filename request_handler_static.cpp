@@ -1,13 +1,14 @@
 #include "request_handler.hpp"
 #include "request_handler_static.hpp"
-#include "httpRequest.hpp"
-#include "httpResponse.hpp"
+#include "config_parser.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
 #include <memory>
 
-const std::map<std::string, std::string> MIMEmap  = {
+
+const std::unordered_map<std::string, std::string> MIMEmap  = {
  { "html", "text/html"},
  { "css", "text/css"},
  { "js", "text/javascript"},
@@ -20,38 +21,55 @@ const std::map<std::string, std::string> MIMEmap  = {
 };
 
 
-StaticHandler::StaticHandler(std::string root_dir) : _root(root_dir){
+RequestHandler::Status StaticHandler::Init(const std::string& uri_prefix, const NginxConfig& config){
+  _uri_prefix = uri_prefix;
+  _config = config;
+  _root = "";
+
+  for (auto statement : config.statements_) {
+    if (statement->tokens_[0] == "root" && statement->tokens_.size() > 1)
+      _root = statement->tokens_[1];
+  }   
+
+  if (_root == "")
+    return RequestHandler::ERROR;
+
+  return RequestHandler::OK;
 }
 
-bool StaticHandler::handle_request(const HttpRequest& request, HttpResponse* &response){
+RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Response* response){
   std::stringstream data;
+  
+  std::string uri = request.uri();
+ 
+  std::size_t slash_pos = uri.find("/", 1);
+  std::string file_path = uri.substr(slash_pos + 1);
 
-  std::string response_code;
-  std::string body;
-  //first ensure that root_dir doesn't end with slash AND filePath doesn't begin with slash
-  std::string file_path = request.getFilePath();
-
+  //Ensure only 1 slash in full path when concatenated
   if (_root[_root.size() - 1] == '/' && file_path[0] == '/'){
     _root = _root.substr(0, _root.size() - 1);
   }
 
   std::string full_path = _root + file_path;
-  bool recognizedFileType = getMIMEType(file_path);
+  std::string content_type = "";
+  bool recognizedFileType = getMIMEType(file_path, &content_type);
+  
   if (!recognizedFileType){
-    response_code = "415";
-    _content_type = "text/plain";
-    body = "415: Unsupported file extension given";
-    response = new HttpResponse(response_code, _content_type, body);
-    return true;
+    response->SetStatus(Response::UNSUPPORTED_MEDIA_TYPE);
+    response->SetBody("415: Unsupported file extension given");
+    response->AddHeader("Content-Type", content_type);
+    return OK;
   }
 
-  std::ifstream fil(full_path);
-  if (!fil.good()){
-    response_code = "404";
-    body = "404: File not found";
-    response = new HttpResponse(response_code, _content_type, body);
-    return true;
+  std::ifstream fil;
+  fil.open(full_path, std::ifstream::in);
+  if (!fil.is_open()){
+    response->SetStatus(Response::NOT_FOUND);
+    response->SetBody("404: File not found");
+    response->AddHeader("Content-Type", "text/plain");
+    return OK;
   }
+
   char nextChar = fil.get();
   std::string fileData;
   while (fil.good()){
@@ -59,13 +77,14 @@ bool StaticHandler::handle_request(const HttpRequest& request, HttpResponse* &re
     nextChar = fil.get();
   }
 
+  response->SetStatus(Response::OK);
+  response->SetBody(fileData);
+  response->AddHeader("Content-Type", content_type);
   fil.close();
-  response_code = "200";
-  response = new HttpResponse(response_code, _content_type, fileData);
-  return true;
+  return OK;
 }
 
-bool StaticHandler::getMIMEType(std::string file_name){
+bool StaticHandler::getMIMEType(const std::string& file_name, std::string * content_type){
   unsigned int extLen = 0;
   //First get the extension
   for (int i = file_name.size() - 1; i >= 0; i--){
@@ -84,7 +103,7 @@ bool StaticHandler::getMIMEType(std::string file_name){
   if (it == MIMEmap.end())
     return false;
 
-  _content_type = it->second;
+  *content_type = it->second;
   return true;
 }
 
