@@ -26,3 +26,7 @@ std::string Response::ToString(){
   msg += _body;
   return msg;
 }
+
+Response::ResponseCode Response::getStatus(){
+  return _response_code;
+}

@@ -7,6 +7,8 @@
 #include "response.hpp"
 #include "request_handler_echo.hpp"
 #include "request_handler_static.hpp"
+#include "request_handler_notFound.hpp"
+#include "request_handler_status.hpp"
 
 #include <unordered_map>
 #include <iterator>
@@ -33,6 +35,26 @@ bool Server::extractConfig(std::string& errorMessage){
     if ((*it)->tokens_[0] == "port" && (*it)->tokens_.size() > 1){
       str_port = (*it)->tokens_[1];
       port = stoi(str_port);
+    }
+    
+    //Extract default handler for errors
+    else if ((*it)->tokens_[0] == "default" && (*it)->tokens_.size() > 1){
+      std::string handler = (*it)->tokens_[1];
+      std::string uri_prefix = "NotFound";
+      
+      NginxConfig handlerConfig; 
+       if ((*it)->child_block_)
+         handlerConfig = (*(*it)->child_block_); 
+       else {
+         errorMessage = "Handler " + handler + " needs configuration blocks {}.";
+         return false;
+       }
+      
+      //Add Handler to private member _handlerContainer
+       if (!addHandler(handler, uri_prefix, handlerConfig)){
+         errorMessage = "Could not add handler: " + handler + " with uri_prefix: " + uri_prefix;
+         return false;
+       }
     }
  
     //Extract Handler and Init them with uri_prefix and NginxConfig (subconfig for that handler)   
@@ -71,12 +93,27 @@ bool Server::extractConfig(std::string& errorMessage){
 
 bool Server::addHandler(const std::string& handlerName, const std::string& uri_prefix, const NginxConfig& sub_config){
     
-    if (handlerName == "EchoHandler")
+    if (handlerName == "EchoHandler"){
       _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new EchoHandler()));
-    else if (handlerName ==  "StaticHandler")
+      pathToHandler.emplace(uri_prefix, "EchoHandler");
+    }
+    else if (handlerName ==  "StaticHandler"){
       _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new StaticHandler()));
+      pathToHandler.emplace(uri_prefix, "StaticHandler");
+    }
+    else if (handlerName == "StatusHandler"){
+      _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new StatusHandler()));
+      pathToHandler.emplace(uri_prefix, "StatusHandler");
+    }
+    else{
+      _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new NotFoundHandler()));
+      pathToHandler.emplace(uri_prefix, "NotFoundHandler");
+    }
 
     RequestHandler::Status status = _handlerContainer[uri_prefix]->Init(uri_prefix, sub_config);
+  
+    //So request object can access the server public info
+    _handlerContainer[uri_prefix]->setServer(this);
     if (status == RequestHandler::OK)
       return true;
     else
@@ -102,9 +139,24 @@ bool Server::init(std::string& errorMessage){
 
 }
 
+//Create a string for the status handler
+std::string Server::getStatus(){
+  std::string ret = "Server has received " + std::to_string(requestArchive.size()) + " requests.\n-------------\n";
+  for (auto it = requestArchive.begin(); it != requestArchive.end(); it++)
+    ret += "Request Path: " + it->first + ", Response: " + std::to_string(it->second) + "\n";
+  
+  
+  ret += "\nPath to handler mapping: \n";
+  
+  for (auto it = pathToHandler.begin(); it != pathToHandler.end(); it++)
+    ret += "Path: " + it->first + ", Handler: " + it->second + "\n";
+  
+  return ret;
+}
+
 
 void Server::run(){
-  std::cout << "Running echo_server... " << std::endl << std::endl;
+  std::cout << "Running server... " << std::endl << std::endl;
 
   for(;;){
     boost::asio::ip::tcp::socket socket(io_service_);
@@ -133,14 +185,20 @@ void Server::run(){
     std::string uri = httpRequest->uri();
     std::size_t prefix_slash = uri.find("/", 1);
     std::string uri_prefix = uri.substr(0, prefix_slash);
-  
-    RequestHandler::Status response_status;
-    response_status = _handlerContainer[uri_prefix]->HandleRequest((*httpRequest), httpResponse);
-         
+    Response::ResponseCode response_status;
+    
+    //We check if uri_prefix is valid
+    if (_handlerContainer.find(uri_prefix) == _handlerContainer.end()){
+      response_status = _handlerContainer["NotFound"]->HandleRequest((*httpRequest), httpResponse);
+    }
+    else
+      response_status = _handlerContainer[uri_prefix]->HandleRequest((*httpRequest), httpResponse);
     //TODO: IF response_status is NOT OK, create 500 Server error response
+    
+    requestArchive.emplace(uri, response_status);
 
     std::size_t bytes_written;
-    if (response_status == RequestHandler::OK){ 
+    if (response_status != Response::SERVER_ERROR){ 
       std::string response_str = httpResponse->ToString();
       bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
     }
