@@ -181,20 +181,36 @@ void Server::run(){
     auto httpRequest = Request::Parse(raw_request);
     Response  * httpResponse  = new Response();;
 
-    //TODO: This extraction doesn't work with a StaticHandler path of "/"
     std::string uri = httpRequest->uri();
-    std::size_t prefix_slash = uri.find("/", 1);
-    std::string uri_prefix = uri.substr(0, prefix_slash);
+
+    bool notFound = true;
     Response::ResponseCode response_status;
-    
-    //We check if uri_prefix is valid
-    if (_handlerContainer.find(uri_prefix) == _handlerContainer.end()){
-      response_status = _handlerContainer["NotFound"]->HandleRequest((*httpRequest), httpResponse);
+
+    std::vector<int> slashPositions;
+    for (int i = uri.size(); i >= 0; i--){
+      if (uri[i] == '/')
+        slashPositions.push_back(i);
     }
-    else
-      response_status = _handlerContainer[uri_prefix]->HandleRequest((*httpRequest), httpResponse);
-    //TODO: IF response_status is NOT OK, create 500 Server error response
-    
+
+    // Loop through slashes and see if any prefixes match config paths
+    for (auto it = slashPositions.begin(); it != slashPositions.end(); it++){
+      std::size_t prefix_slash = uri.find("/", *it);
+      if (prefix_slash == 0)
+        prefix_slash++;
+      std::string uri_prefix = uri.substr(0, prefix_slash);
+   
+      //We check if uri_prefix is valid
+      if (_handlerContainer.find(uri_prefix) != _handlerContainer.end()){
+        notFound = false;
+        response_status = _handlerContainer[uri_prefix]->HandleRequest((*httpRequest), httpResponse);
+        break;
+      }
+    }
+   
+    //No Handler for prefix
+    if (notFound) 
+        response_status = _handlerContainer["NotFound"]->HandleRequest((*httpRequest), httpResponse);
+ 
     requestArchive.emplace(uri, response_status);
 
     std::size_t bytes_written;

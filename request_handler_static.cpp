@@ -42,8 +42,7 @@ Response::ResponseCode StaticHandler::HandleRequest(const Request& request, Resp
   
   std::string uri = request.uri();
  
-  std::size_t slash_pos = uri.find("/", 1);
-  std::string file_path = uri.substr(slash_pos + 1);
+  std::string file_path = uri.substr(_uri_prefix.size(), uri.size() - _uri_prefix.size());
 
   //Ensure only 1 slash in full path when concatenated
   if (_root[_root.size() - 1] == '/' && file_path[0] == '/'){
