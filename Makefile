@@ -15,8 +15,8 @@ CXXFLAGS= -Wall -std=c++11
 #Link Flags
 LFLAGS= -lboost_system -lboost_regex
 
-SRC = server_main.cpp server.cpp request.cpp response.cpp request_handler.cpp request_handler_echo.cpp request_handler_static.cpp
-CPP_OBJ = server_main.o server.o request.o response.o request_handler_echo.o request_handler_static.o
+SRC = server_main.cpp server.cpp request.cpp response.cpp request_handler.cpp request_handler_echo.cpp request_handler_static.cpp request_handler_notFound.cpp request_handler_status.cpp
+CPP_OBJ = server_main.o server.o request.o response.o request_handler_echo.o request_handler_static.o request_handler_notFound.o request_handler_status.o
 CC_OBJ = config_parser.o
 
 default: server

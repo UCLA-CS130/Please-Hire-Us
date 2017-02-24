@@ -2,12 +2,14 @@
 
 port 8080; #Another comment
 
-path / StaticHandler {
-    root /home/mpgermano/CS130/Please-Hire-Us/www/;
+path /static StaticHandler {
+    root /home/nasso/cs130/Please-Hire-Us/www/;
 }
 
 path /echo EchoHandler {}
 
+path /status StatusHandler {}
+
 # Default handler if no handlers match
-default NotFoundHandler{}
+default NotFoundHandler {}
 

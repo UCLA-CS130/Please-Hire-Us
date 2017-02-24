@@ -25,10 +25,12 @@ class Response {
     OK = 200,
     BAD_REQUEST = 400,
     NOT_FOUND = 404,
-    UNSUPPORTED_MEDIA_TYPE = 415
+    UNSUPPORTED_MEDIA_TYPE = 415,
+    SERVER_ERROR = 500
   };
   
   void SetStatus(const ResponseCode response_code);
+  ResponseCode getStatus();
   void AddHeader(const std::string& header_name, const std::string& header_value);
   void SetBody(const std::string& body);
   

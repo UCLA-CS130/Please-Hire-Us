@@ -37,7 +37,7 @@ RequestHandler::Status StaticHandler::Init(const std::string& uri_prefix, const 
   return RequestHandler::OK;
 }
 
-RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Response* response){
+Response::ResponseCode StaticHandler::HandleRequest(const Request& request, Response* response){
   std::stringstream data;
   
   std::string uri = request.uri();
@@ -58,7 +58,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
     response->SetStatus(Response::UNSUPPORTED_MEDIA_TYPE);
     response->SetBody("415: Unsupported file extension given");
     response->AddHeader("Content-Type", content_type);
-    return OK;
+    return response->getStatus();
   }
 
   std::ifstream fil;
@@ -67,7 +67,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
     response->SetStatus(Response::NOT_FOUND);
     response->SetBody("404: File not found");
     response->AddHeader("Content-Type", "text/plain");
-    return OK;
+    return response->getStatus();
   }
 
   char nextChar = fil.get();
@@ -81,7 +81,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   response->SetBody(fileData);
   response->AddHeader("Content-Type", content_type);
   fil.close();
-  return OK;
+  return response->getStatus();
 }
 
 bool StaticHandler::getMIMEType(const std::string& file_name, std::string * content_type){
