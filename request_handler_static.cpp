@@ -65,10 +65,15 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   std::ifstream fil;
   fil.open(full_path, std::ifstream::in);
   if (!fil.is_open()){
+<<<<<<< HEAD
     response->SetStatus(Response::NOT_FOUND);
     response->SetBody("404: File not found");
     response->AddHeader("Content-Type", "text/plain");
     return RequestHandler::NOT_FOUND;
+=======
+    NotFoundHandler newHandler;       // Invoke 404 error handler if file not found
+    return newHandler.HandleRequest(request, response);
+>>>>>>> bf9ca306c06db20fdc33c909ff768a7e122cfbc2
   }
 
   char nextChar = fil.get();
