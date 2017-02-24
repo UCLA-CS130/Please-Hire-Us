@@ -21,7 +21,7 @@ RequestHandler::Status NotFoundHandler::HandleRequest(const Request& request, Re
   std::string content_header = "text/plain";
 
   response->AddHeader(content_header_name, content_header);
-  response->SetBody("An error occurred. Unknown path specified.");
+  response->SetBody("404 error - File Not Found");
   
   return RequestHandler::OK;
 }
