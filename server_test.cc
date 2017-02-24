@@ -21,15 +21,14 @@ class ServerConfigTest : public :: testing::Test {
 
 TEST_F(ServerConfigTest, SimpleConfig){
   inputConfig_ = 
-  "server {"
-  "  path /static StaticHandler {"
-  "    root '/example';"
-  "  }"
-  "  echo /echo EchoHandler {"
-  "    root '/fix/this';"
-  "  }"
-  "  port 3000;"
-  "}";
+  "port 8000; #Another comment"
+  "path /static StaticHandler {"
+    "root /home/nasso/cs130/Please-Hire-Us/www/;"
+  "}"
+  "path /echo EchoHandler {}"
+  "path /status StatusHandler {}"
+  "# Default handler if no handlers match"
+  "default NotFoundHandler {}"
   
   bool didParse = parse(inputConfig_, server_config_);
   ASSERT_TRUE(didParse); 
@@ -38,7 +37,7 @@ TEST_F(ServerConfigTest, SimpleConfig){
   bool success = server.extractConfig(errorMessage_);
   EXPECT_TRUE(success);
   
-  EXPECT_EQ(server.getPort(), 3000);
+  EXPECT_EQ(server.getPort(), 8000);
   
   EXPECT_TRUE(server.init(errorMessage_));
 }
@@ -46,9 +45,7 @@ TEST_F(ServerConfigTest, SimpleConfig){
 
 TEST_F(ServerConfigTest, BadPort){
   inputConfig_ =
-  "server {"
-  "  port -4300;"
-  "}";
+  "port -4300;"
 
   bool didParse = parse(inputConfig_, server_config_);
   ASSERT_TRUE(didParse);
@@ -62,7 +59,7 @@ TEST_F(ServerConfigTest, BadPort){
 
   EXPECT_FALSE(server.init(errorMessage_));
 }
-
+/*
 TEST_F(ServerConfigTest, NestedConfig){
   inputConfig_ =
   "server {"
@@ -83,4 +80,4 @@ TEST_F(ServerConfigTest, NestedConfig){
 
   EXPECT_TRUE(server.init(errorMessage_));
 }
-
+*/
