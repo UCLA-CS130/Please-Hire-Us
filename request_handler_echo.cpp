@@ -14,7 +14,7 @@ RequestHandler::Status EchoHandler::Init(const std::string& uri_prefix, const Ng
 
 }
 
-Response::ResponseCode EchoHandler::HandleRequest(const Request& request, Response* response){
+RequestHandler::Status EchoHandler::HandleRequest(const Request& request, Response* response){
 
   response->SetStatus(Response::OK);
   std::string content_header_name = "Content-Type";
@@ -23,5 +23,5 @@ Response::ResponseCode EchoHandler::HandleRequest(const Request& request, Respon
   response->AddHeader(content_header_name, content_header);
   response->SetBody(request.raw_request());
   
-  return response->getStatus();
+  return RequestHandler::OK;
 }

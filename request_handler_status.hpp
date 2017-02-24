@@ -10,7 +10,7 @@ class StatusHandler : public RequestHandler {
 public:
   StatusHandler();
   virtual RequestHandler::Status Init(const std::string& uri_prefix, const NginxConfig& config);
-  virtual Response::ResponseCode HandleRequest(const Request& request, Response* response);
+  virtual RequestHandler::Status HandleRequest(const Request& request, Response* response);
 };
 
 #endif

@@ -14,8 +14,11 @@ class Server;
 class RequestHandler {
  public:
   enum Status {
-    OK = 0,
-    ERROR = -1
+    OK = 200,
+    BAD_REQUEST = 400,
+    NOT_FOUND = 404,
+    UNSUPPORTED_MEDIA_TYPE = 415,
+    SERVER_ERROR = 500
   };
   
   // Initializes the handler. Returns a response code indicating success or
@@ -29,7 +32,7 @@ class RequestHandler {
   // indicating success or failure condition. If ResponseCode is not OK, the
   // contents of the response object are undefined, and the server will return
   // HTTP code 500.
-  virtual Response::ResponseCode HandleRequest(const Request& request,
+  virtual Status HandleRequest(const Request& request,
                                Response* response) = 0;
   
   //Set server so we can access server methods 

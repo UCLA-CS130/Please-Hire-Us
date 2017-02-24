@@ -14,7 +14,7 @@ RequestHandler::Status StatusHandler::Init(const std::string& uri_prefix, const 
 
 }
 
-Response::ResponseCode StatusHandler::HandleRequest(const Request& request, Response* response){
+RequestHandler::Status StatusHandler::HandleRequest(const Request& request, Response* response){
 
   response->SetStatus(Response::OK);
   std::string content_header_name = "Content-Type";
@@ -23,5 +23,5 @@ Response::ResponseCode StatusHandler::HandleRequest(const Request& request, Resp
   response->AddHeader(content_header_name, content_header);
   response->SetBody(parent->getStatus());
   
-  return response->getStatus();
+  return RequestHandler::OK;
 }

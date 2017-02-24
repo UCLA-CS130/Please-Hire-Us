@@ -111,7 +111,7 @@ bool Server::addHandler(const std::string& handlerName, const std::string& uri_p
     }
 
     RequestHandler::Status status = _handlerContainer[uri_prefix]->Init(uri_prefix, sub_config);
-  
+    
     //So request object can access the server public info
     _handlerContainer[uri_prefix]->setServer(this);
     if (status == RequestHandler::OK)
@@ -184,7 +184,7 @@ void Server::run(){
     std::string uri = httpRequest->uri();
 
     bool notFound = true;
-    Response::ResponseCode response_status;
+    RequestHandler::Status response_status;
 
     std::vector<int> slashPositions;
     for (int i = uri.size(); i >= 0; i--){
@@ -192,18 +192,25 @@ void Server::run(){
         slashPositions.push_back(i);
     }
 
-    // Loop through slashes and see if any prefixes match config paths
-    for (auto it = slashPositions.begin(); it != slashPositions.end(); it++){
-      std::size_t prefix_slash = uri.find("/", *it);
-      if (prefix_slash == 0)
-        prefix_slash++;
-      std::string uri_prefix = uri.substr(0, prefix_slash);
-   
-      //We check if uri_prefix is valid
-      if (_handlerContainer.find(uri_prefix) != _handlerContainer.end()){
-        notFound = false;
-        response_status = _handlerContainer[uri_prefix]->HandleRequest((*httpRequest), httpResponse);
-        break;
+    if (_handlerContainer.find(uri) != _handlerContainer.end()){
+      response_status = _handlerContainer[uri]->HandleRequest((*httpRequest), httpResponse);
+      notFound = false;
+    }
+
+    else {
+      // Loop through slashes and see if any prefixes match config paths
+      for (auto it = slashPositions.begin(); it != slashPositions.end(); it++){
+        std::size_t prefix_slash = uri.find("/", *it);
+        if (prefix_slash == 0)
+          prefix_slash++;
+     
+        std::string uri_prefix = uri.substr(0, prefix_slash); 
+        //We check if uri_prefix is valid
+        if (_handlerContainer.find(uri_prefix) != _handlerContainer.end()){
+          notFound = false;
+          response_status = _handlerContainer[uri_prefix]->HandleRequest((*httpRequest), httpResponse);
+          break;
+        }
       }
     }
    
@@ -214,7 +221,7 @@ void Server::run(){
     requestArchive.emplace(uri, response_status);
 
     std::size_t bytes_written;
-    if (response_status != Response::SERVER_ERROR){ 
+    if (response_status != RequestHandler::SERVER_ERROR){ 
       std::string response_str = httpResponse->ToString();
       bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
     }

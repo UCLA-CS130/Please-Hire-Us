@@ -14,7 +14,7 @@ RequestHandler::Status NotFoundHandler::Init(const std::string& uri_prefix, cons
 
 }
 
-Response::ResponseCode NotFoundHandler::HandleRequest(const Request& request, Response* response){
+RequestHandler::Status NotFoundHandler::HandleRequest(const Request& request, Response* response){
 
   response->SetStatus(Response::OK);
   std::string content_header_name = "Content-Type";
@@ -23,5 +23,5 @@ Response::ResponseCode NotFoundHandler::HandleRequest(const Request& request, Re
   response->AddHeader(content_header_name, content_header);
   response->SetBody("An error occurred. Unknown path specified.");
   
-  return response->getStatus();
+  return RequestHandler::OK;
 }
