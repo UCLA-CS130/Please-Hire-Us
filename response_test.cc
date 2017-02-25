@@ -19,6 +19,6 @@ TEST(ResponseGetStatusTest, validGetStatus){
   Response response;
   response.SetStatus(Response::OK);
   
-  Response::ResponseCode response_OK = 200;
+  Response::ResponseCode response_OK = Response::OK;
   EXPECT_EQ(response_OK, response.getStatus());
 }

@@ -179,7 +179,7 @@ void Server::run(){
     std::string errorMessage;
     
     auto httpRequest = Request::Parse(raw_request);
-    Response  * httpResponse  = new Response();;
+    Response  * httpResponse  = new Response();
 
     std::string uri = httpRequest->uri();
 
