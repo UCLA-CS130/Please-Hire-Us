@@ -27,9 +27,9 @@ TEST(EchoHandlerTest, validHandleRequest) {
   "Accept-Encoding: gzip, deflate"
   "Connection: keep-alive\r\n\r\n";
 
-  Request request = Request::Parse(raw_request);
+  auto request = Request::Parse(raw_request);
 
-  RequestHandler::Status echo_status = handler.HandleRequest(request, response);
+  RequestHandler::Status echo_status = handler.HandleRequest((*request), &response);
   EXPECT_EQ(echo_status, 200);
   EXPECT_EQ(response.getStatus(), 200);
 }

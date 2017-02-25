@@ -28,7 +28,7 @@ TEST_F(ServerConfigTest, SimpleConfig){
   "path /echo EchoHandler {}"
   "path /status StatusHandler {}"
   "# Default handler if no handlers match"
-  "default NotFoundHandler {}"
+  "default NotFoundHandler {}";
   
   bool didParse = parse(inputConfig_, server_config_);
   ASSERT_TRUE(didParse); 
@@ -45,7 +45,7 @@ TEST_F(ServerConfigTest, SimpleConfig){
 
 TEST_F(ServerConfigTest, BadPort){
   inputConfig_ =
-  "port -4300;"
+  "port -4300;";
 
   bool didParse = parse(inputConfig_, server_config_);
   ASSERT_TRUE(didParse);
