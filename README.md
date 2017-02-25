@@ -44,6 +44,23 @@ To run all unit tests and check coverage:
 $ make coverage
 ```
 
+## Source Code Information
+
+### Code Layout
+
+* `server.cpp`: Defines the server class, which initiates and runs the server process
+* `request.cpp`: Defines the request class, representing an HTTP request
+* `response.cpp`: Defines the response class, representing an HTTP response
+* `request_handler.hpp`: The abstract base class for request handling
+* `request_handler_echo.cpp`: Defines the EchoHandler class, which initiates and handles echo requests
+* `request_handler_static.cpp`: Defines the StaticHandler class, which initiates and handles static requests
+* `request_handler_status.cpp`: Defines the StatusHandler class, which initiates and handles status requests
+* `request_handler_notFound.cpp`: Defines the NotFoundHandler class, which initiates and handles 404 not found requests
+
+Each of the above .cpp files has an accompanying `_test.cc` file containing unit tests for the respective class
+
+
+
 ##### Contributors
  * Michael Germano
  * Austin Nasso
