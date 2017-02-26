@@ -13,7 +13,7 @@ TEST(StaticHandlerTest, validRequest){
 
 
   std::string raw_request = 
-  "GET /static/dogs.gif HTTP/1.1\r\n"
+  "GET /static/nofile.txt HTTP/1.1\r\n"
   "Host: localhost:8080"
   "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0"
   "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
@@ -35,7 +35,7 @@ TEST(StaticHandlerTest, validRequest){
   handler.Init("/static", out_config);
   RequestHandler::Status response_status = handler.HandleRequest(*req, response);
   
-  EXPECT_EQ(response_status, RequestHandler::OK);
+  EXPECT_EQ(response_status, RequestHandler::NOT_FOUND);
   delete(response);
 }
 
