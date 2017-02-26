@@ -36,7 +36,7 @@ test:
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) config_parser_test.cc config_parser.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o config_parser_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_handler_echo_test.cc response.cpp request.cpp request_handler_echo.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_handler_echo_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_handler_static_test.cc config_parser.cc response.cpp request.cpp request_handler_static.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_handler_static_test
-	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_handler_status_test.cc server.cpp response.cpp request.cpp request_handler_status.cpp request_handler_echo.cpp request_handler_static.cpp request_handler_notFound.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_handler_status_test
+	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_handler_status_test.cc config_parser.cc server.cpp response.cpp request.cpp request_handler_status.cpp request_handler_echo.cpp request_handler_static.cpp request_handler_notFound.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_handler_status_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_handler_notFound_test.cc response.cpp request.cpp request_handler_notFound.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_handler_notFound_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) response_test.cc response.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o response_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_test.cc request.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_test
@@ -56,11 +56,10 @@ coverage:
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) config_parser_test.cc config_parser.cc ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o config_parser_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_handler_echo_test.cc response.cpp request.cpp request_handler_echo.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_handler_echo_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_handler_static_test.cc config_parser.cc response.cpp request.cpp request_handler_static.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_handler_static_test
-	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_handler_status_test.cc server.cpp response.cpp request.cpp request_handler_status.cpp request_handler_echo.cpp request_handler_static.cpp request_handler_notFound.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_handler_status_test
+	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_handler_status_test.cc config_parser.cc server.cpp response.cpp request.cpp request_handler_status.cpp request_handler_echo.cpp request_handler_static.cpp request_handler_notFound.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_handler_status_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_handler_notFound_test.cc response.cpp request.cpp request_handler_notFound.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_handler_notFound_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) response_test.cc response.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o response_test
 	$(CCX) $(TEST_CCXFLAGS) $(GTEST_FLAGS) request_test.cc request.cpp ${GTEST_DIR}/src/gtest_main.cc libgtest.a $(LFLAGS) -o request_test
-	touch *.gcda
 	./config_parser_test
 	gcov -r config_parser.cc
 	./server_test

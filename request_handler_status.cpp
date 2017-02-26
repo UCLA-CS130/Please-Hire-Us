@@ -1,3 +1,4 @@
+#include "request_handler.hpp"
 #include "request_handler_status.hpp"
 #include "response.hpp"
 #include <iostream>
@@ -20,6 +21,7 @@ RequestHandler::Status StatusHandler::HandleRequest(const Request& request, Resp
   std::string content_header_name = "Content-Type";
   std::string content_header = "text/plain";
 
+  
   response->AddHeader(content_header_name, content_header);
   response->SetBody(parent->getStatus());
   

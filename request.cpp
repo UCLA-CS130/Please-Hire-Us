@@ -23,15 +23,26 @@ std::unique_ptr<Request> Request::Parse(const std::string& raw_request){
     req->_uri = what[2];
     req->_version = what[3];
 
-      /*
-      boost::regex_search(full_path, what, path_expr);
-      uri = what[0];
-      _filePath = full_path.substr(uri.size(), full_path.size() - _path.size());
-      */
   }
 
-  //TODO: Extract header and add them to the _headers private member variable
-  //TODO: Create Reg EXPR to extract body
+  boost::regex header_expr{"([a-zA-Z-]*): ([^\n]*)"};
+  std::string::const_iterator searchStart (raw_request.cbegin());
+
+  while (boost::regex_search(searchStart, raw_request.cend(), what, header_expr)){
+    std::string header_name;
+    std::string header_value;
+
+    if (what.length() < 3)
+      continue;
+ 
+    header_name = what[1];
+    header_value = what[2]; 
+    
+    searchStart += what.position() + what.length();
+    std::pair<std::string, std::string> header_pair(header_name, header_value);
+    req->_headers.push_back(header_pair);
+  }
+  
   req->_body = "";
   return req;
 }
