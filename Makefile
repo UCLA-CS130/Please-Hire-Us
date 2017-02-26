@@ -6,7 +6,7 @@ CCX = g++
 #Test Flags
 GTEST_DIR = googletest/googletest
 GTEST_FLAGS = -isystem ${GTEST_DIR}/include 
-TEST_CCXFLAGS = -std=c++11 -Wall -pthread -fprofile-arcs -ftest-coverage
+TEST_CCXFLAGS = -Wall -std=c++11 -pthread -fprofile-arcs -ftest-coverage
 TEST_SRC = server_test.cc server.cpp
 
 #Compiler Flags
