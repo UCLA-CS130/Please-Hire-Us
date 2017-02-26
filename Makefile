@@ -2,15 +2,14 @@
 
 CCX = g++
 
-
 #Test Flags
 GTEST_DIR = googletest/googletest
 GTEST_FLAGS = -isystem ${GTEST_DIR}/include 
-TEST_CCXFLAGS = -std=c++0x -Wall -pthread -fprofile-arcs -ftest-coverage
+TEST_CCXFLAGS = -std=c++11 -pthread -fprofile-arcs -ftest-coverage
 TEST_SRC = server_test.cc server.cpp
 
 #Compiler Flags
-CXXFLAGS= -Wall -std=c++11
+CXXFLAGS= -std=c++11
 
 #Link Flags
 LFLAGS= -lboost_system -lboost_regex
