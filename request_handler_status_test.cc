@@ -4,6 +4,8 @@
 #include "request.hpp"
 #include "response.hpp"
 #include <iostream>
+#include "config_parser.h"
+
 
 TEST(StatusHandlerTest, validInit) {
   StatusHandler handler;
@@ -28,8 +30,15 @@ TEST(StatusHandlerTest, validHandleRequest) {
   "Connection: keep-alive\r\n\r\n";
 
   auto request = Request::Parse(raw_request);
+  std::string empty_config = "";
+  std::stringstream config_stream(empty_config);
 
-  RequestHandler::Status status_handler_status = handler.HandleRequest(*request, &response);
-  EXPECT_EQ(status_handler_status, 200);
-  EXPECT_EQ(response.getStatus(), 200);
+  NginxConfigParser parser;
+  NginxConfig out_config;
+  //parser.Parse(&config_stream, &out_config);
+
+  handler.Init("/status", out_config);
+  //RequestHandler::Status status_handler_status = handler.HandleRequest(*request, &response);
+  //EXPECT_EQ(status_handler_status, 200);
+  //EXPECT_EQ(response.getStatus(), 200);
 }
