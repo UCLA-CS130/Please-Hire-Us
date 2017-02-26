@@ -1,4 +1,7 @@
 language: cpp
+dist: trusty
+compiler: 
+  - g++
 script: make test
 addons:
  apt:
