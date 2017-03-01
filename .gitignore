@@ -3,6 +3,8 @@
 !*.*
 !*/
 !googletest
+!Makefile
+!config
 
 #Ignore all test binaries
 unit_tests/*
