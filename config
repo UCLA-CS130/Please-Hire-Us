@@ -3,7 +3,7 @@
 port 8080; #Another comment
 
 path /static StaticHandler {
-    root /home/gil/cs130/Please-Hire-Us/www/;
+    root ./www/;
 }
 
 path /echo EchoHandler {}
