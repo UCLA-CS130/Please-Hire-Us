@@ -5,6 +5,10 @@ port 8080; #Another comment
 path /static StaticHandler {
     root ./www/;
 }
+path /proxy ReverseProxyHandler {
+    remote_host www.ucla.edu;
+    remote_port 80;
+}
 
 path /echo EchoHandler {}
 

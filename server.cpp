@@ -9,6 +9,7 @@
 #include "request_handler_static.hpp"
 #include "request_handler_notFound.hpp"
 #include "request_handler_status.hpp"
+#include "request_handler_reverse_proxy.hpp"
 
 #include <unordered_map>
 #include <iterator>
@@ -105,6 +106,10 @@ bool Server::addHandler(const std::string& handlerName, const std::string& uri_p
       _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new StatusHandler()));
       pathToHandler.emplace(uri_prefix, "StatusHandler");
     }
+    else if (handlerName == "ReverseProxyHandler") {
+      _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new ReverseProxyHandler()));
+      pathToHandler.emplace(uri_prefix, "ReverseProxyHandler");
+    }
     else{
       _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new NotFoundHandler()));
       pathToHandler.emplace(uri_prefix, "NotFoundHandler");
@@ -124,6 +129,7 @@ bool Server::addHandler(const std::string& handlerName, const std::string& uri_p
 bool Server::init(std::string& errorMessage){
 
   bool validConfig = extractConfig(errorMessage);
+  std::cout << errorMessage << std::endl;
   if (!validConfig){
     return false;
   }

@@ -12,10 +12,10 @@ TEST_SRC = server_test.cc server.cpp
 CXXFLAGS= -std=c++11
 
 #Link Flags
-LFLAGS= -lboost_system -lboost_regex
+LFLAGS= -lboost_system -lboost_regex -lpthread
 
 SRC = server_main.cpp server.cpp request.cpp response.cpp request_handler_echo.cpp request_handler_static.cpp request_handler_notFound.cpp request_handler_status.cpp
-CPP_OBJ = server_main.o server.o request.o response.o request_handler_echo.o request_handler_static.o request_handler_notFound.o request_handler_status.o
+CPP_OBJ = server_main.o server.o request.o response.o request_handler_echo.o request_handler_static.o request_handler_notFound.o request_handler_status.o request_handler_reverse_proxy.o
 CC_OBJ = config_parser.o
 
 default: server
