@@ -6,9 +6,7 @@
 #include <boost/bind.hpp>
 
 ReverseProxyHandler::ReverseProxyHandler()
-{
-  std::cout << "-----------------SANITY CHECK -----------------" << std::endl;
-}
+{}
 
 RequestHandler::Status ReverseProxyHandler::Init(const std::string& uri_prefix,
                       const NginxConfig& config)
@@ -16,21 +14,35 @@ RequestHandler::Status ReverseProxyHandler::Init(const std::string& uri_prefix,
   m_uri_prefix = uri_prefix;
   m_remote_host = "";
   m_remote_port = "http";
+  m_path = "";
+  std::string url_ = "";
 
-  for ( auto statement : config.statements_ )
-  {
-    for (auto token: statement->tokens_)
-    {
-      if (token == "remote_host" && statement->tokens_.size() == 2)
-      {
-        m_remote_host = statement->tokens_[1];
-      }
-      else if (token == "remote_port" && statement->tokens_.size() == 2)
-      {
-        m_remote_port = statement->tokens_[1];
-      }
-    }
-  }
+  for (auto statement : config.statements_)
+	{
+		if(statement->tokens_.size() == 2 && statement->tokens_[0] == "remote_host")
+		{
+			url_ = statement->tokens_[1];
+
+			std::string::size_type protocol_pos = url_.find("//");
+			if(protocol_pos == std::string::npos) {
+				std::cout << "remote_host didn't specify protocol.'" << std::endl;
+				return RequestHandler::INVALID;
+			}
+			m_remote_port = url_.substr(0, protocol_pos - 1);
+
+			std::string::size_type host_pos = url_.find('/', protocol_pos + 2);
+			if(host_pos != std::string::npos) {
+				m_remote_host = url_.substr(protocol_pos + 2, host_pos - protocol_pos - 2);
+				m_path = url_.substr(host_pos);
+			}
+			else {
+				m_remote_host = url_.substr(protocol_pos + 2);
+				m_path = "/";
+			}
+			printf("m_path: %s\n", m_path.c_str());
+			return RequestHandler::OK;
+		}
+	}
 
   // Need both the host and the port config values
   if (m_remote_host.empty() || m_remote_port.empty())

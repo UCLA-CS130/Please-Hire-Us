@@ -6,7 +6,12 @@ path /static StaticHandler {
     root ./www/;
 }
 path /proxy ReverseProxyHandler {
-    remote_host www.ucla.edu;
+    remote_host http://www.ucla.edu;
+    remote_port 80;
+}
+
+path /proxy1 ReverseProxyHandler {
+    remote_host http://www.ucla.edu/asdf;
     remote_port 80;
 }
 

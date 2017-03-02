@@ -28,6 +28,7 @@ private:
   std::string m_remote_host;
   std::string m_remote_port;
   std::string m_uri_prefix;
+  std::string m_path;
 };
 
 

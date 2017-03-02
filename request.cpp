@@ -11,7 +11,7 @@ std::unique_ptr<Request> Request::Parse(const std::string& raw_request){
   req->_raw_request = raw_request;
   
   //Set request type, path, method
-  boost::regex first_line_expr{"^([a-zA-Z]+) (\\/[\?a-zA-Z0-9.\\/]*) ([a-zA-Z0-9.\\/]*)"};
+  boost::regex first_line_expr{"^([a-zA-Z]+) (\\/[-_\\+\?a-zA-Z0-9.\\/]*) ([a-zA-Z0-9.\\/]*)"};
   //boost::regex path_expr{"(\\/[\?a-zA-Z0-9]*)"};
   boost::smatch what;
   
