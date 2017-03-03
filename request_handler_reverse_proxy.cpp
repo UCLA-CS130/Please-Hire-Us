@@ -37,7 +37,7 @@ RequestHandler::Status ReverseProxyHandler::Init(const std::string& uri_prefix,
 			}
 			else {
 				m_remote_host = url_.substr(protocol_pos + 2);
-				m_path = "/";
+				m_path = "";
 			}
 			printf("m_path: %s\n", m_path.c_str());
 			return RequestHandler::OK;
@@ -57,7 +57,7 @@ RequestHandler::Status ReverseProxyHandler::HandleRequest(const Request& request
                                Response* response)
 {
   // Get the request URI (e.g. /proxy/static/file.txt)
-  std::string new_uri = request.uri();
+  std::string new_uri = request.uri() + m_path;
   std::cout << "Original URI: " << new_uri << std::endl;
 
   // Generate new URI (/static/file.txt)
@@ -89,7 +89,7 @@ RequestHandler::Status ReverseProxyHandler::HandleRequest(const Request& request
 }
 
 
-RequestHandler::Status ReverseProxyHandler::SendProxyRequest(const std::string& request_string, const std::string& new_host,
+RequestHandler::Status ReverseProxyHandler::SendProxyRequest(const std::string& request_string, const std::string& new_host, 
                                                             Response* response, const int& attempt_num)
 {
   // Create connection to m_remote_host:m_remote_port

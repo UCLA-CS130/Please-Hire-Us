@@ -3,7 +3,7 @@
 port 8080; #Another comment
 
 path /static StaticHandler {
-    root ./www/;
+    root www/;
 }
 path /proxy ReverseProxyHandler {
     remote_host http://www.ucla.edu;

@@ -188,7 +188,6 @@ void Server::run(){
     Response  * httpResponse  = new Response();
 
     std::string uri = httpRequest->uri();
-    std::cout << "URI potato: " << uri << std::endl;
     bool notFound = true;
     RequestHandler::Status response_status;
 
@@ -199,7 +198,6 @@ void Server::run(){
     }
 
     if (_handlerContainer.find(uri) != _handlerContainer.end()){
-      std::cout << "URI: " << uri << std::endl;
       response_status = _handlerContainer[uri]->HandleRequest((*httpRequest), httpResponse);
       notFound = false;
     }
@@ -207,7 +205,6 @@ void Server::run(){
     else {
       // Loop through slashes and see if any prefixes match config paths
       for (auto it = slashPositions.begin(); it != slashPositions.end(); it++){
-        std::cout << "URI: " << uri << std::endl;
         std::size_t prefix_slash = uri.find("/", *it);
         if (prefix_slash == 0)
           prefix_slash++;
