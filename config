@@ -15,6 +15,11 @@ path /proxy1 ReverseProxyHandler {
     remote_port 80;
 }
 
+path /proxy2 ReverseProxyHandler {
+    remote_host http://ucla.edu;
+    remote_port 80;
+}
+
 path /echo EchoHandler {}
 
 path /status StatusHandler {}

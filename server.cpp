@@ -178,7 +178,7 @@ void Server::run(){
     std::size_t bytes_read = socket.read_some(boost::asio::buffer(req_buf), error);
     
     if (bytes_read == 0){
-      std::cout << "--------ERROR-------Boost Error Code-----" << error << std::endl;
+      std::cout << "--------ERROR-------Boost Error Code-----" << error.message() << std::endl;
       return;
     }
     std::string raw_request(req_buf);
@@ -232,7 +232,7 @@ void Server::run(){
       bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
     }
     if (bytes_written == 0){
-      std::cerr << "Http response could not be written; ERROR: " << error << std::endl;
+      std::cerr << "Http response could not be written; ERROR: " << error.message() << std::endl;
       return;
     }
 

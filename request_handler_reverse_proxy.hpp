@@ -23,6 +23,7 @@ public:
   bool ParseRedirect(std::istream& response_stream, std::string& redirect_URI,
                                         std::string& redirect_host);
   std::string ParseBody(boost::asio::streambuf* response_buf);
+  std::string ParseBody(std::string);
 private:
 
   std::string m_remote_host;
