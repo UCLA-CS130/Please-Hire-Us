@@ -120,6 +120,80 @@ bool Server::addHandler(const std::string& handlerName, const std::string& uri_p
       return false;
 }
 
+void Server::runConnection(boost::asio::ip::tcp::socket socket) {
+
+  // This will be set on any error from socket.read_some
+  boost::system::error_code error;
+
+  // MAX request size is 8 KB
+  char req_buf[MAX_REQUEST_SIZE];
+  memset(req_buf, 0, MAX_REQUEST_SIZE);
+
+  std::size_t bytes_read = socket.read_some(boost::asio::buffer(req_buf), error);
+  
+  if (bytes_read == 0){
+    std::cout << "--------ERROR-------Boost Error Code-----" << error << std::endl;
+    return;
+  }
+  std::string raw_request(req_buf);
+  std::string errorMessage;
+  
+  auto httpRequest = Request::Parse(raw_request);
+  Response  * httpResponse  = new Response();
+
+  std::string uri = httpRequest->uri();
+
+  bool notFound = true;
+  RequestHandler::Status response_status;
+
+  std::vector<int> slashPositions;
+  for (int i = uri.size(); i >= 0; i--){
+    if (uri[i] == '/')
+      slashPositions.push_back(i);
+  }
+
+  if (_handlerContainer.find(uri) != _handlerContainer.end()){
+    response_status = _handlerContainer[uri]->HandleRequest((*httpRequest), httpResponse);
+    notFound = false;
+  }
+
+  else {
+    // Loop through slashes and see if any prefixes match config paths
+    for (auto it = slashPositions.begin(); it != slashPositions.end(); it++){
+      std::size_t prefix_slash = uri.find("/", *it);
+      if (prefix_slash == 0)
+        prefix_slash++;
+   
+      std::string uri_prefix = uri.substr(0, prefix_slash); 
+      //We check if uri_prefix is valid
+      if (_handlerContainer.find(uri_prefix) != _handlerContainer.end()){
+        notFound = false;
+        response_status = _handlerContainer[uri_prefix]->HandleRequest((*httpRequest), httpResponse);
+        break;
+      }
+    }
+  }
+ 
+  //No Handler for prefix
+  if (notFound) 
+      response_status = _handlerContainer["NotFound"]->HandleRequest((*httpRequest), httpResponse);
+
+  requestArchive.emplace(uri, response_status);
+
+  std::size_t bytes_written;
+  if (response_status != RequestHandler::SERVER_ERROR){ 
+    std::string response_str = httpResponse->ToString();
+    bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
+  }
+  if (bytes_written == 0){
+    std::cerr << "Http response could not be written; ERROR: " << error << std::endl;
+    return;
+  }
+
+  delete(httpResponse);
+
+}
+
 // Take config file and extract necessary details and init acceptor to listen
 bool Server::init(std::string& errorMessage){
 
@@ -161,75 +235,6 @@ void Server::run(){
   for(;;){
     boost::asio::ip::tcp::socket socket(io_service_);
     acceptor_.accept(socket);
-
-    // This will be set on any error from socket.read_some
-    boost::system::error_code error;
-
-    // MAX request size is 8 KB
-    char req_buf[MAX_REQUEST_SIZE];
-    memset(req_buf, 0, MAX_REQUEST_SIZE);
-
-    std::size_t bytes_read = socket.read_some(boost::asio::buffer(req_buf), error);
-    
-    if (bytes_read == 0){
-      std::cout << "--------ERROR-------Boost Error Code-----" << error << std::endl;
-      return;
-    }
-    std::string raw_request(req_buf);
-    std::string errorMessage;
-    
-    auto httpRequest = Request::Parse(raw_request);
-    Response  * httpResponse  = new Response();
-
-    std::string uri = httpRequest->uri();
-
-    bool notFound = true;
-    RequestHandler::Status response_status;
-
-    std::vector<int> slashPositions;
-    for (int i = uri.size(); i >= 0; i--){
-      if (uri[i] == '/')
-        slashPositions.push_back(i);
-    }
-
-    if (_handlerContainer.find(uri) != _handlerContainer.end()){
-      response_status = _handlerContainer[uri]->HandleRequest((*httpRequest), httpResponse);
-      notFound = false;
-    }
-
-    else {
-      // Loop through slashes and see if any prefixes match config paths
-      for (auto it = slashPositions.begin(); it != slashPositions.end(); it++){
-        std::size_t prefix_slash = uri.find("/", *it);
-        if (prefix_slash == 0)
-          prefix_slash++;
-     
-        std::string uri_prefix = uri.substr(0, prefix_slash); 
-        //We check if uri_prefix is valid
-        if (_handlerContainer.find(uri_prefix) != _handlerContainer.end()){
-          notFound = false;
-          response_status = _handlerContainer[uri_prefix]->HandleRequest((*httpRequest), httpResponse);
-          break;
-        }
-      }
-    }
-   
-    //No Handler for prefix
-    if (notFound) 
-        response_status = _handlerContainer["NotFound"]->HandleRequest((*httpRequest), httpResponse);
- 
-    requestArchive.emplace(uri, response_status);
-
-    std::size_t bytes_written;
-    if (response_status != RequestHandler::SERVER_ERROR){ 
-      std::string response_str = httpResponse->ToString();
-      bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
-    }
-    if (bytes_written == 0){
-      std::cerr << "Http response could not be written; ERROR: " << error << std::endl;
-      return;
-    }
-
-    delete(httpResponse);
+    std::thread(&Server::runConnection, this, std::move(socket)).detach();
   }
 }

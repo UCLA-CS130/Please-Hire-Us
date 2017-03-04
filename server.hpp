@@ -8,6 +8,8 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <map>
+#include <thread>
+
 
 class RequestHandler;
 
@@ -22,6 +24,7 @@ class Server {
    bool extractConfig(std::string& errorMessage);
    bool addHandler(const std::string& handlerName, const std::string& uri_prefix, const NginxConfig& sub_config);
    void run();
+   void runConnection(boost::asio::ip::tcp::socket socket);
    std::string getStatus(); 
 
  private:
