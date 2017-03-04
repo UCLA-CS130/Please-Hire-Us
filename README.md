@@ -1,4 +1,7 @@
 # Simple Web Server
+
+![](https://travis-ci.com/UCLA-CS130/Please-Hire-Us..svg?token=yz9yBJgd4Sxya2e1weD1&branch=master)
+
 UCLA CS130: Winter 2017  
 Created using Boost C++ Library
 
