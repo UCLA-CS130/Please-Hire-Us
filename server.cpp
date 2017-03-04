@@ -235,6 +235,6 @@ void Server::run(){
   for(;;){
     boost::asio::ip::tcp::socket socket(io_service_);
     acceptor_.accept(socket);
-    std::thread(runConnection, std::move(socket)).detach();
+    std::thread(&Server::runConnection, this, std::move(socket)).detach();
   }
 }
