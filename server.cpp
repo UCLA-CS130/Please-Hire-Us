@@ -311,7 +311,8 @@ void Server::run(){
       return;
     }
 
+    //std::thread(&Server::runConnection, this, std::move(socket)).detach();
     delete(httpResponse);
-    std::thread(&Server::runConnection, this, std::move(socket)).detach();
+    
   }
 }

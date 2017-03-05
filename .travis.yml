@@ -4,6 +4,7 @@ compiler:
   - g++
 script: 
   - make test
+  - make reverse_proxy_int_test
 install:
   - pip install psutil
 addons:
