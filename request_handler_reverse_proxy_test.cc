@@ -12,7 +12,7 @@ protected:
   std::shared_ptr<NginxConfigStatement> statement2 = std::make_shared<NginxConfigStatement>();
 
   std::string uri_prefix = "/proxy";
-  std::string request_url  = "GET /proxy/static/index.html HTTP/1.1\r\ntest\r\n\r\n";
+  std::string request_url  = "GET /proxy/static/index.html HTTP/1.0\r\n\r\n";
   std::unique_ptr<Request> request = Request::Parse(request_url);
 
   std::string rh = "remote_host";
@@ -68,18 +68,6 @@ TEST_F(ReverseProxyHandler_Test, Init_Fail){
   EXPECT_EQ(RequestHandler::INVALID, handler.Init(uri_prefix, *config));
 }
 
-
-// test valid Init config
-TEST_F(ReverseProxyHandler_Test, Init_Pass){
-  statement->tokens_.push_back(rh);
-  statement->tokens_.push_back(host);
-  config->statements_.push_back(statement);
-  statement2->tokens_.push_back(rp);
-  statement2->tokens_.push_back(port);
-  config->statements_.push_back(statement2);
-  EXPECT_EQ(RequestHandler::OK, handler.Init(uri_prefix, *config));
-}
-
 // test ProcessHeaderLine
 TEST_F(ReverseProxyHandler_Test, ProcessHeaderLine){
   std::string header = "Content-Length: 10\r";
@@ -126,22 +114,4 @@ TEST_F(ReverseProxyHandler_Test, InvalidRedirectURL){
   std::string response_string = "HTTP/1.1 302 Moved Temporarily\r\nLocation: http://\r\n\r\n";
   std::istringstream response_stream(response_string);
   ASSERT_FALSE(handler.ParseRedirect(response_stream, redirect_URI, redirect_host));
-}
-
-// test ParseBody
-TEST_F(ReverseProxyHandler_Test, ParseBody){
-  statement->tokens_.push_back(rh);
-  statement->tokens_.push_back(host);
-  config->statements_.push_back(statement);
-  statement2->tokens_.push_back(rp);
-  statement2->tokens_.push_back(port);
-  config->statements_.push_back(statement2);
-  ASSERT_EQ(RequestHandler::OK, handler.Init(uri_prefix, *config));
-
-  boost::asio::streambuf response_buf;
-  std::ostream response_stream(&response_buf);
-  response_stream << "<a href=\"/about\">About</a><img src=\"/img/test.jpg\">";
-
-  std::string expected_body = "<a href=\"/proxy/about\">About</a><img src=\"/proxy/img/test.jpg\">";
-  EXPECT_EQ(expected_body, handler.ParseBody(&response_buf));
 }
