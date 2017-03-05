@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
-#include "../reverse_proxy_handler.hpp"
-#include "../config_parser.hpp"
+#include "request_handler_reverse_proxy.hpp"
+#include "config_parser.h"
 
 // test fixture used in following test
 class ReverseProxyHandler_Test: public::testing::Test {
@@ -16,9 +16,9 @@ protected:
   std::unique_ptr<Request> request = Request::Parse(request_url);
 
   std::string rh = "remote_host";
-  std::string host = "localhost";
+  std::string host = "http://localhost";
   std::string rp = "remote_port";
-  std::string port = "3001";
+  std::string port = "80";
 };
 
 class SendProxyRequest_Test: public::testing::Test {
@@ -50,11 +50,7 @@ TEST_F(SendProxyRequest_Test, InvalidHost){
   statement->tokens_.push_back(rh);
   statement->tokens_.push_back(invalid_host);
   config->statements_.push_back(statement);
-  handler.Init(uri_prefix, *config);
-  std::string request_string = "GET / HTTP/1.0\r\n\r\n";
-  RequestHandler::Status status = handler.SendProxyRequest(request_string, invalid_host, &response);
-
-  EXPECT_EQ(RequestHandler::INVALID, status);
+  EXPECT_EQ(handler.Init(uri_prefix, *config), RequestHandler::INVALID);
 }
 
 TEST_F(SendProxyRequest_Test, Redirect){

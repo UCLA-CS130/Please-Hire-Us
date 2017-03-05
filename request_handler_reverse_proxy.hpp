@@ -2,14 +2,12 @@
 #define REVERSE_PROXY_HPP
 
 #include <string>
-#include "request_handler.hpp"
 #include "request.hpp"
 #include "response.hpp"
-
+#include "request_handler.hpp"
 
 /// The common handler for all incoming requests.
-class ReverseProxyHandler
-  : public RequestHandler
+class ReverseProxyHandler: public RequestHandler
 {
 public:
   ReverseProxyHandler();

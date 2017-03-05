@@ -5,6 +5,7 @@
 #include "config_parser.h"
 #include "request.hpp"
 #include "response.hpp"
+#include "request_handler.hpp"
 #include "request_handler_echo.hpp"
 #include "request_handler_static.hpp"
 #include "request_handler_notFound.hpp"

@@ -1,3 +1,4 @@
+#include "request_handler.hpp"
 #include "request_handler_reverse_proxy.hpp"
 #include <iostream>
 #include <sstream>
@@ -18,6 +19,10 @@ RequestHandler::Status ReverseProxyHandler::Init(const std::string& uri_prefix,
   m_remote_port = "http";
   m_path = "";
   std::string url_ = "";
+
+  //Reverse proxy server can only be run from root to avoid issues with renaming locations
+  if (m_uri_prefix != "/")
+    return RequestHandler::INVALID;
 
   for (auto statement : config.statements_)
 	{
@@ -82,9 +87,15 @@ RequestHandler::Status ReverseProxyHandler::HandleRequest(const Request& request
     new_uri = m_path;
   }
   std::cout << "New URI: " << new_uri << std::endl;
-  // Generate new request
-  //    GET new_URI HTTP/1.0\r\n\r\n
+  // Hacking stuff horribly
   std::string new_request = "GET " + new_uri + " HTTP/1.0\r\n\r\n";
+  // std::string new_request = request.method() + " HTTP/1.1\r\nConnection: close\r\n";
+  // for (auto header_ : request.headers()) {
+  //   if (header_.first != "Connection")
+  //     new_request = new_request + header_.first + ": " + header_.second + "\r\n";
+  // }
+  // new_request += "\r\n";
+  // new_request += request.body();
 
   std::cout << "Send Proxy Request...\n";
   return SendProxyRequest(new_request, m_remote_host, response);
@@ -192,7 +203,7 @@ RequestHandler::Status ReverseProxyHandler::SendProxyRequest(const std::string& 
     // Set header attribute/value in response
     if (!header.empty()) {
       std::pair<std::string, std::string> parsed_header = ProcessHeaderLine(header);
-      if (parsed_header.first != "" && parsed_header.first != "Content-Length" && parsed_header.second != "")
+      if (parsed_header.first != "" && parsed_header.second != "")
       {
         response->AddHeader(parsed_header.first, parsed_header.second);
       }
@@ -207,9 +218,9 @@ RequestHandler::Status ReverseProxyHandler::SendProxyRequest(const std::string& 
   }
   std::string response_body = response_string.substr(body_pos + 4);
 
-  std::string parsed_body = ParseBody(response_body);
+  //std::string parsed_body = ParseBody(response_body);
   response->SetStatus(Response::OK);
-  response->SetBody(parsed_body);
+  response->SetBody(response_body);
   return RequestHandler::OK;
 }
 
