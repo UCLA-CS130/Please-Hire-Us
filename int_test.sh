@@ -8,6 +8,9 @@ make
 ./server config &
 echo "Running server."
 
+#Check for multithreading
+telnet localhost 8080 &
+
 #Send message to server
 ACTUAL_MSG="$(curl -si http://localhost:8080/echo)"
 
