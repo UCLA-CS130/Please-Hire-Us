@@ -30,6 +30,6 @@ TEST(NotFoundHandlerTest, validHandleRequest) {
   auto request = Request::Parse(raw_request);
 
   RequestHandler::Status not_found_status = handler.HandleRequest(*request, &response);
-  EXPECT_EQ(not_found_status, 200);
-  EXPECT_EQ(response.getStatus(), 200);
+  EXPECT_EQ(not_found_status, 404);
+  EXPECT_EQ(response.getStatus(), 404);
 }

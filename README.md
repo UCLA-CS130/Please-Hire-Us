@@ -47,6 +47,13 @@ To run all unit tests and check coverage:
 $ make coverage
 ```
 
+To run reverse proxy integration tests:
+
+```
+$ pip install psutil
+$ make reverse_proxy_int_test
+```
+
 ## Source Code Information
 
 ### Code Layout

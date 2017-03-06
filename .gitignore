@@ -1,0 +1,24 @@
+# Ignore all binaries in root
+*
+!*.*
+!*/
+!googletest
+!Makefile
+!config
+
+#Ignore all test binaries
+unit_tests/*
+!unit_tests/*.*
+!unit_tests/*/
+
+#gcc object files
+*.o
+*.a
+
+#gcov files
+*.gcda
+*.gcno
+*.gcov
+
+#Mac things
+.DS_Store

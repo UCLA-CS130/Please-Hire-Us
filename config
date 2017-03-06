@@ -3,7 +3,11 @@
 port 8080; #Another comment
 
 path /static StaticHandler {
-    root /home/gil/cs130/Please-Hire-Us/www/;
+    root www/;
+}
+path / ReverseProxyHandler {
+    remote_host http://www.ucla.edu;
+    remote_port 80;
 }
 
 path /echo EchoHandler {}

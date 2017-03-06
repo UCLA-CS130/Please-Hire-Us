@@ -2,7 +2,11 @@ language: cpp
 dist: trusty
 compiler: 
   - g++
-script: make test
+script: 
+  - make test
+  - make reverse_proxy_int_test
+install:
+  - pip install psutil
 addons:
  apt:
    packages:

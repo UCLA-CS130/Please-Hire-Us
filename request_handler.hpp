@@ -18,7 +18,8 @@ class RequestHandler {
     BAD_REQUEST = 400,
     NOT_FOUND = 404,
     UNSUPPORTED_MEDIA_TYPE = 415,
-    SERVER_ERROR = 500
+    SERVER_ERROR = 500,
+    INVALID = 1
   };
   
   // Initializes the handler. Returns a response code indicating success or

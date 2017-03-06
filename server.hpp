@@ -14,7 +14,7 @@
 class RequestHandler;
 
 const int MAX_REQUEST_SIZE = 8192;
-const std::unordered_set<std::string>handlers = {"EchoHandler", "StaticHandler", "StatusHandler", "NotFoundHandler"}; 
+const std::unordered_set<std::string>handlers = {"EchoHandler", "StaticHandler", "StatusHandler", "NotFoundHandler", "ReverseProxyHandler"}; 
 
 class Server {
  public:

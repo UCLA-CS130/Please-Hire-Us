@@ -16,12 +16,12 @@ RequestHandler::Status NotFoundHandler::Init(const std::string& uri_prefix, cons
 
 RequestHandler::Status NotFoundHandler::HandleRequest(const Request& request, Response* response){
 
-  response->SetStatus(Response::OK);
+  response->SetStatus(Response::NOT_FOUND);
   std::string content_header_name = "Content-Type";
   std::string content_header = "text/plain";
 
   response->AddHeader(content_header_name, content_header);
   response->SetBody("404 error - File Not Found");
   
-  return RequestHandler::OK;
+  return RequestHandler::NOT_FOUND;
 }
