@@ -5,11 +5,13 @@ make clean
 make
 
 #Run the server
-./server config &
+./server config > /dev/null &
 echo "Running server."
 
+sleep 2
+
 #Check for multithreading
-telnet localhost 8080 &
+telnet localhost 8080 > /dev/null &
 
 #Send message to server
 ACTUAL_MSG="$(curl -si http://localhost:8080/echo)"
