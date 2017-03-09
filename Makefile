@@ -19,6 +19,11 @@ SRC = server_main.cpp server.cpp request.cpp response.cpp request_handler_echo.c
 CPP_OBJ = server_main.o server.o request.o response.o request_handler_echo.o request_handler_static.o request_handler_notFound.o request_handler_status.o request_handler_reverse_proxy.o
 CC_OBJ = config_parser.o
 
+KEY_LOC=../aws-key-pairs/cs130-ec2-key-pair.pem
+EC2_HOST=ec2-35-162-66-89.us-west-2.compute.amazonaws.com
+EC2_SERVER=ec2-user@ec2-35-162-66-89.us-west-2.compute.amazonaws.com
+
+
 default: server
 
 $(CPP_OBJ): %.o : %.cpp 
@@ -85,13 +90,22 @@ coverage:
 	./request_handler_reverse_proxy_test
 	gcov -r request_handler_reverse_proxy.cpp
 
-
+# docker building and deployment scripts created with help from the Makefile of Team13, spaceteam, and Team22, as well as http://stackoverflow.com/questions/23935141/how-to-copy-docker-images-from-one-host-to-another-without-via-repository
 docker_build:
 	docker build -t httpserver.build .
 	docker run httpserver.build > ./deploy/binary.tar
 	tar -xvf ./deploy/binary.tar -C ./deploy
 	rm ./deploy/binary.tar
 	docker build -t httpserver -f deploy/Dockerfile.run ./deploy
+
+docker_deploy:
+	docker save -o httpserver-image httpserver
+	scp -i $(KEY_LOC) httpserver-image $(EC2_SERVER):~
+	rm httpserver-image
+	ssh -i $(KEY_LOC) $(EC2_SERVER) 'docker load -i httpserver-image; docker kill `docker ps -q`; docker run --rm -t -p 80:8080 httpserver; exit'
+
+docker_kill:
+	ssh -i $(KEY_LOC) $(EC2_SERVER) 'docker kill `docker ps -q`'
 
 clean:
 	rm -f *.o *_test *.gcov *.gcno *.gcda server
