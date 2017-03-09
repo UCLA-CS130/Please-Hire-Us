@@ -1,6 +1,7 @@
 #include "response.hpp"
 #include <vector>
 #include <string>
+#include <iostream>
 
 void Response::SetStatus(const ResponseCode response_code){
   _response_code = response_code;

@@ -137,7 +137,7 @@ void Server::runConnection(boost::asio::ip::tcp::socket socket) {
 
   std::size_t bytes_read = socket.read_some(boost::asio::buffer(req_buf), error);
   
-  if (bytes_read == 0){
+  if (bytes_read == 0 && error != boost::asio::error::eof){
     std::cout << "--------ERROR-------Boost Error Code-----" << error << std::endl;
     return;
   }
@@ -191,7 +191,7 @@ void Server::runConnection(boost::asio::ip::tcp::socket socket) {
     std::string response_str = httpResponse->ToString();
     bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
   }
-  if (bytes_written == 0){
+  if (bytes_written == 0 && error != boost::asio::error::eof){
     std::cerr << "Http response could not be written; ERROR: " << error << std::endl;
     return;
   }
@@ -252,7 +252,7 @@ void Server::run(){
 
     std::size_t bytes_read = socket.read_some(boost::asio::buffer(req_buf), error);
     
-    if (bytes_read == 0){
+    if (bytes_read == 0 && error != boost::asio::error::eof){
       std::cout << "--------ERROR-------Boost Error Code-----" << error.message() << std::endl;
       return;
     }
@@ -306,7 +306,7 @@ void Server::run(){
       std::string response_str = httpResponse->ToString();
       bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
     }
-    if (bytes_written == 0){
+    if (bytes_written == 0 && error != boost::asio::error::eof){
       std::cerr << "Http response could not be written; ERROR: " << error.message() << std::endl;
       return;
     }
