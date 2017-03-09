@@ -16,7 +16,7 @@ RequestHandler::Status ReverseProxyHandler::Init(const std::string& uri_prefix,
 {
   m_uri_prefix = uri_prefix;
   m_remote_host = "";
-  m_remote_port = "http";
+  m_remote_port = "80";
   m_path = "";
   std::string url_ = "";
 
@@ -109,6 +109,10 @@ RequestHandler::Status ReverseProxyHandler::SendProxyRequest(const std::string& 
   std::cout << "Create connection...\n";
   boost::asio::io_service io_service;
   boost::asio::ip::tcp::resolver resolver(io_service);
+
+  if (m_remote_port == "http")
+    m_remote_port = "80";
+
   boost::asio::ip::tcp::resolver::query query(new_host, m_remote_port);
   boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
   boost::asio::ip::tcp::resolver::iterator end;
