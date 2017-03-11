@@ -6,12 +6,14 @@
 #include <sstream>
 #include <unordered_map>
 #include <memory>
+#include "markdown-lib/markdown.h"
 
 
 const std::unordered_map<std::string, std::string> MIMEmap  = {
  { "html", "text/html"},
  { "css", "text/css"},
  { "js", "text/javascript"},
+ { "md", "text/markdown"},
  { "png", "image/png"},
  { "gif", "image/gif"},
  { "jpeg", "image/jpeg"},
@@ -78,11 +80,30 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
     nextChar = fil.get();
   }
 
+  std::string convertedData = fileData;
+  if (content_type == "text/markdown"){
+    convertedData = convertFileToMarkdown(fileData);
+    content_type = "text/html";
+  }
   response->SetStatus(Response::OK);
-  response->SetBody(fileData);
+  response->SetBody(convertedData);
   response->AddHeader("Content-Type", content_type);
   fil.close();
   return RequestHandler::OK;
+}
+
+std::string StaticHandler::convertFileToMarkdown(std::string inputData){
+  
+  std::string markdown;
+  std::ostringstream output_stream;
+  
+  markdown::Document mdDoc;
+  mdDoc.read(inputData);
+  mdDoc.write(output_stream);
+
+  markdown = output_stream.str();
+
+  return markdown;
 }
 
 bool StaticHandler::getMIMEType(const std::string& file_name, std::string * content_type){
