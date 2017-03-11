@@ -27,10 +27,14 @@ RequestHandler::Status StaticHandler::Init(const std::string& uri_prefix, const 
   _uri_prefix = uri_prefix;
   _config = config;
   _root = "";
+  chainedHandler = "";
 
   for (auto statement : config.statements_) {
-    if (statement->tokens_[0] == "root" && statement->tokens_.size() > 1)
+    if (statement->tokens_.size() > 1 && statement->tokens_[0] == "root")
       _root = statement->tokens_[1];
+   
+    if (statement->tokens_.size() > 1 && statement->tokens_[0] == "chain")
+      chainedHandler = statement->tokens_[1];
   }   
 
   if (_root == ""){
@@ -42,8 +46,8 @@ RequestHandler::Status StaticHandler::Init(const std::string& uri_prefix, const 
 }
 
 RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Response* response){
-  std::stringstream data;
   
+  std::stringstream data; 
   std::string uri = request.uri();
  
   std::string file_path = uri.substr(_uri_prefix.size(), uri.size() - _uri_prefix.size());

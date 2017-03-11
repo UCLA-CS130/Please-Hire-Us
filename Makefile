@@ -13,10 +13,10 @@ CXXFLAGS= -std=c++11
 
 #Link Flags
 #LDFLAGS= -static-libgcc -static-libstdc++ -Wl,-Bstatic -lboost_system -lboost_regex -lpthread
-LDFLAGS = -static-libgcc -static-libstdc++ -lpthread -Wl,-Bstatic -lboost_log_setup -lboost_log -lboost_thread -lboost_system -lm -lboost_regex
+LDFLAGS = -static-libgcc -static-libstdc++ -lpthread -Wl,-Bstatic -lboost_log_setup -lboost_log -lboost_thread -lboost_system -lboost_iostreams -lz -lm -lboost_regex
 
-SRC = server_main.cpp server.cpp request.cpp response.cpp request_handler_echo.cpp request_handler_static.cpp request_handler_notFound.cpp request_handler_status.cpp markdown-lib/markdown.cpp markdown-lib/markdown-tokens.cpp 
-CPP_OBJ = server_main.o server.o request.o response.o request_handler_echo.o request_handler_static.o request_handler_notFound.o request_handler_status.o request_handler_reverse_proxy.o markdown-lib/markdown.o markdown-lib/markdown-tokens.o
+SRC = server_main.cpp server.cpp request.cpp response.cpp request_handler_echo.cpp request_handler_static.cpp request_handler_notFound.cpp request_handler_status.cpp request_handler_compress.cpp markdown-lib/markdown.cpp markdown-lib/markdown-tokens.cpp 
+CPP_OBJ = server_main.o server.o request.o response.o request_handler_echo.o request_handler_static.o request_handler_notFound.o request_handler_status.o request_handler_reverse_proxy.o request_handler_compress.o markdown-lib/markdown.o markdown-lib/markdown-tokens.o
 CC_OBJ = config_parser.o
 
 KEY_LOC=../aws-key-pairs/cs130-ec2-key-pair.pem
