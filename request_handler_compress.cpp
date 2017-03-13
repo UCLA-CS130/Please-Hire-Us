@@ -77,7 +77,6 @@ RequestHandler::Status CompressionHandler::HandleRequest(const Request& request,
   std::string headers= response->ToString();
   std::size_t pos = headers.find("\r\n\r\n");
   std::string h_str = headers.substr(0, pos+1);
-  std::cout << h_str<< std::endl;
   return RequestHandler::OK;
 }
 
