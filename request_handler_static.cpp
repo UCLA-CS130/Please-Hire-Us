@@ -51,6 +51,10 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   std::string uri = request.uri();
  
   std::string file_path = uri.substr(_uri_prefix.size(), uri.size() - _uri_prefix.size());
+  
+  //Set default homepage for static directory
+  if (file_path == "/" || file_path == "")
+    file_path = "/index.html";
 
   //Ensure only 1 slash in full path when concatenated
   if (_root[_root.size() - 1] == '/' && file_path[0] == '/'){

@@ -6,6 +6,7 @@ path /static StaticHandler {
     root www/;
     chain CompressionHandler;
 }
+
 path / ReverseProxyHandler {
     remote_host http://www.ucla.edu;
     remote_port 80;
