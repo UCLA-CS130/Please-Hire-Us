@@ -56,7 +56,7 @@ def main():
   run_background_process("./server " + CONFIG_FILE_NAME + " &")
 
   # Basic reverse proxy test
-  test("PROXY HANDLER", PROXY_PATH, "UCLA.edu Homepage", "8080");
+  test("PROXY HANDLER", PROXY_PATH, "UCLA.edu Homepage", "8008");
 
   kill_server(0)
 
@@ -64,7 +64,7 @@ def main():
   run_background_process("./server " + CONFIG_FILE_NAME2 + " &")
 
   # Reverse proxy redirect test
-  test("PROXY HANDLER", PROXY_PATH, "UCLA.edu Homepage", "8080");
+  test("PROXY HANDLER", PROXY_PATH, "UCLA.edu Homepage", "8008");
 
   kill_server(0)
 

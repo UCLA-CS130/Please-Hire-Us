@@ -1,10 +1,12 @@
 #Comment
 
-port 8080; #Another comment
+port 8008; #Another comment
 
 path /static StaticHandler {
     root www/;
+    chain CompressionHandler;
 }
+
 path / ReverseProxyHandler {
     remote_host http://www.ucla.edu;
     remote_port 80;
@@ -13,6 +15,8 @@ path / ReverseProxyHandler {
 path /echo EchoHandler {}
 
 path /status StatusHandler {}
+
+path /compress CompressionHandler {}
 
 # Default handler if no handlers match
 default NotFoundHandler {}
