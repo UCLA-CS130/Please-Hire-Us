@@ -20,8 +20,8 @@ CPP_OBJ = server_main.o server.o request.o response.o request_handler_echo.o req
 CC_OBJ = config_parser.o
 
 KEY_LOC=../aws-key-pairs/cs130-ec2-key-pair.pem
-EC2_HOST=ec2-35-162-66-89.us-west-2.compute.amazonaws.com
-EC2_SERVER=ec2-user@ec2-35-162-66-89.us-west-2.compute.amazonaws.com
+EC2_HOST=ec2-54-68-226-16.us-west-2.compute.amazonaws.com
+EC2_SERVER=ec2-user@ec2-54-68-226-16.us-west-2.compute.amazonaws.com
 
 
 default: server
