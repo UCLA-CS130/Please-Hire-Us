@@ -212,7 +212,7 @@ void Server::runConnection(boost::asio::ip::tcp::socket socket) {
   //Call chain handler if previous handler had successful response
   
 
-  std::size_t bytes_written;
+  std::size_t bytes_written = 0;
   if (response_status != RequestHandler::SERVER_ERROR){ 
     std::string response_str = httpResponse->ToString();
     bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
