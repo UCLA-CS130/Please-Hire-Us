@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Please Hire Us</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+
+</head>
+  <script type="text/javascript">
+    function main(){
+      httpGetAsync("status_demo", "/status", setText, "none");
+      httpGetAsync("echo_demo", "/echo", setText, "none");
+      httpGetAsync("compress_demo", "/static/index.html", setText, "gzip");
+      
+      var txt = document.getElementById("path").value;
+      var path = "/static/1" + txt;
+      httpGetAsync("notfound_demo", path, setText, "both");
+    }
+    
+    function setText(id, text){
+      document.getElementById(id).innerHTML = text;
+    }
+    
+    function httpGetAsync(id, url, callback, opt){
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.onreadystatechange = function(){
+        if (xmlHttp.readyState == 4){
+            if (opt == "none")
+              callback(id, xmlHttp.responseText);
+            else if (opt == "both")
+              callback(id, xmlHttp.getAllResponseHeaders() + "\n" + xmlHttp.responseText);
+            else 
+              callback(id, xmlHttp.getAllResponseHeaders());
+        }
+      }
+      
+      xmlHttp.open("GET", url, true);
+      if (opt != "none"){
+        xmlHttp.setRequestHeader("Accept-Encoding", "deflate");
+      }
+      xmlHttp.send(null);
+    }
+
+  </script>
+<style type="text/css">
+  .demo{
+    background-color: lightgray;
+    padding: 10px;
+    width: 800px;
+    white-space: pre;
+  }
+</style>
+  
+<body onload="main()">
+  <h1>Please Hire Us</h1>
+  <hr>
+  <h2><a href="/status">Server Status</a></h2>
+  <h3>More info:</h3>
+  <ul> 
+    <li>HTTP Requests Received</li>
+    <li>Path to Handler Mapping</li>
+    <li>Config default set to /status path</li>
+  </ul>
+  <div id="status_demo" class="demo">
+  </div>
+  <button onclick="main()">Refresh</button>
+  <h2><a href="/echo">Echo Handler</a></h2>
+  <h3>More info:</h3>
+  <ul> 
+    <li>Echos HTTP Request in body of response</li>
+    <li>Config default set to /echo</li>
+  </ul>
+  <div id="echo_demo" class="demo">
+  </div>
+  <button onclick="main()">Refresh</button>
+  <h2><a href="/">Reverse Proxy Handler</a></h2>
+  <h3>More info:</h3>
+  <ul> 
+    <li>Sends HTTP Request to www.ucla.edu by default</li>
+    <li>Forwards all URI Resources from source to client</li>
+    <li>Config default set to root directory /</li>
+  </ul>
+  <h2>Static Handler</h2>
+  <h3>More info:</h3>
+  <ul> 
+    <li>Sends static URI Resource to client</li>
+    <li>Config default set to /static</li>
+    <li>Content stored in www directory</li>
+    <li>Supported types include: html, css, js, md, png, gif, jpeg, jpg, txt</li>
+  </ul>
+  <h3>Examples (config should be set to /static): </h3>
+  <ul>
+    <li><a href='/static/dogs.gif'>dogs.gif</a></li>
+    <li><a href='/static/fish.md'>fish.png</a></li>
+    <li><a href='/static/markdown.md'>markdown.md</a></li>
+  </ul>
+  <h2>Compress Handler</h2>
+  <h3>More info:</h3>
+  <ul> 
+    <li>Parses Accept-Encoding header on request</li>
+    <li>Compresses as gzip, deflate or none based on priority</li>
+    <li>Demo below shows response header of request with Accept-Encoding: deflate (See /status above to verify)</li>
+  </ul>
+  <div id="compress_demo" class="demo">
+  </div>
+  <button onclick="main()">Refresh</button>
+  <h2>Not Found Handler</h2>
+  <h3>More info:</h3>
+  <ul> 
+    <li>Returns 404 or 415 Error for not found paths</li>
+  </ul>
+  <div id="notfound_demo" class="demo">
+  </div>
+  <input type="text" id="path" value="File">
+  <button onclick="main()">Refresh</button>
+
+  
+</body>
+</html>
