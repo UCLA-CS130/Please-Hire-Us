@@ -75,12 +75,12 @@ TEST_F(NginxConfigParserTest, CheckOutputEq){
   "    /dev/null;"
   "  }"
   "}"
-  "port 8080;";
+  "port 8008;";
 
   std::stringstream config_stream(small_config);
   bool mustBeTrue = parser_.Parse(&config_stream, &output_config_);
   ASSERT_TRUE(mustBeTrue);
 
   std::string result = output_config_.ToString();
-  EXPECT_EQ(result, "server {\n  location {\n    /dev/null;\n  }\n}\nport 8080;\n");
+  EXPECT_EQ(result, "server {\n  location {\n    /dev/null;\n  }\n}\nport 8008;\n");
 } 
