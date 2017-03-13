@@ -143,8 +143,8 @@ void Server::runConnection(boost::asio::ip::tcp::socket socket) {
 
   std::size_t bytes_read = socket.read_some(boost::asio::buffer(req_buf), error);
   
-  if (bytes_read == 0 && error != boost::asio::error::eof){
-    std::cout << "--------ERROR-------Boost Error Code-----" << error << std::endl;
+  if (bytes_read == 0){// && error != boost::asio::error::eof){
+    //std::cout << "--------ERROR-------Boost Error Code-----" << error << std::endl;
     return;
   }
   std::string raw_request(req_buf);
@@ -192,12 +192,10 @@ void Server::runConnection(boost::asio::ip::tcp::socket socket) {
   }
   
   //If first request was handled correctly, look for chained handler to call on the results
-  else if (_handlerContainer[uri_prefix]->chainedHandler != "" && response_status != RequestHandler::SERVER_ERROR){
-    //Archive first handler's resposne
-    requestArchive.emplace(uri, response_status);
+  else if (_handlerContainer[uri_prefix]->chainedHandler != "" && response_status != RequestHandler::SERVER_ERROR && httpResponse->getStatus() == Response::ResponseCode::OK){
 
     std::string chainedHandler = _handlerContainer[uri_prefix]->chainedHandler;
-    std::cout << "Calling chained handler: " << chainedHandler << std::endl;
+    std::cout << "Calling chained handler: " << chainedHandler << " from uri prefix" << uri_prefix << std::endl;
 
     for (auto it = pathToHandler.begin(); it != pathToHandler.end(); it++){
       if (it->second == chainedHandler){
@@ -206,14 +204,12 @@ void Server::runConnection(boost::asio::ip::tcp::socket socket) {
       }
     }
   }
- 
-
   requestArchive.emplace(uri, response_status);
   //Call chain handler if previous handler had successful response
   
 
   std::size_t bytes_written = 0;
-  if (response_status != RequestHandler::SERVER_ERROR){ 
+  if (response_status != RequestHandler::SERVER_ERROR){
     std::string response_str = httpResponse->ToString();
     bytes_written = socket.write_some(boost::asio::buffer(response_str), error);
   }
