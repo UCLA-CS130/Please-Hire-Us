@@ -40,6 +40,8 @@ class RequestHandler {
   void setServer(Server *p){
     parent = p;
   };
+
+  std::string chainedHandler;
  protected:
   std::string _uri_prefix;
   NginxConfig _config;

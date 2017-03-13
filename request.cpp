@@ -37,13 +37,17 @@ std::unique_ptr<Request> Request::Parse(const std::string& raw_request){
  
     header_name = what[1];
     header_value = what[2]; 
+    if (header_value[header_value.size() - 1] == '\n')
+      header_value = header_value.substr(0, header_value.size() - 1);
     
     searchStart += what.position() + what.length();
     std::pair<std::string, std::string> header_pair(header_name, header_value);
     req->_headers.push_back(header_pair);
   }
   
-  req->_body = "";
+  std::size_t body_pos;
+  body_pos = raw_request.find("\r\n\r\n");
+  req->_body = raw_request.substr(body_pos + 4);
   return req;
 }
 

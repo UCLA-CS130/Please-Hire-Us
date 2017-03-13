@@ -11,6 +11,7 @@
 #include "request_handler_notFound.hpp"
 #include "request_handler_status.hpp"
 #include "request_handler_reverse_proxy.hpp"
+#include "request_handler_compress.hpp"
 
 #include <unordered_map>
 #include <iterator>
@@ -111,6 +112,11 @@ bool Server::addHandler(const std::string& handlerName, const std::string& uri_p
       _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new ReverseProxyHandler()));
       pathToHandler.emplace(uri_prefix, "ReverseProxyHandler");
     }
+    
+    else if (handlerName == "CompressionHandler"){
+      _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new CompressionHandler()));
+      pathToHandler.emplace(uri_prefix, "CompressionHandler");
+    }
     else{
       _handlerContainer.emplace(uri_prefix, std::unique_ptr<RequestHandler>(new NotFoundHandler()));
       pathToHandler.emplace(uri_prefix, "NotFoundHandler");
@@ -157,7 +163,7 @@ void Server::runConnection(boost::asio::ip::tcp::socket socket) {
     if (uri[i] == '/')
       slashPositions.push_back(i);
   }
-
+  std::string uri_prefix = uri;
   if (_handlerContainer.find(uri) != _handlerContainer.end()){
     response_status = _handlerContainer[uri]->HandleRequest((*httpRequest), httpResponse);
     notFound = false;
@@ -170,7 +176,7 @@ void Server::runConnection(boost::asio::ip::tcp::socket socket) {
       if (prefix_slash == 0)
         prefix_slash++;
    
-      std::string uri_prefix = uri.substr(0, prefix_slash); 
+      uri_prefix = uri.substr(0, prefix_slash); 
       //We check if uri_prefix is valid
       if (_handlerContainer.find(uri_prefix) != _handlerContainer.end()){
         notFound = false;
@@ -181,10 +187,30 @@ void Server::runConnection(boost::asio::ip::tcp::socket socket) {
   }
  
   //No Handler for prefix
-  if (notFound) 
+  if (notFound){
       response_status = _handlerContainer["NotFound"]->HandleRequest((*httpRequest), httpResponse);
+  }
+  
+  //If first request was handled correctly, look for chained handler to call on the results
+  else if (_handlerContainer[uri_prefix]->chainedHandler != "" && response_status != RequestHandler::SERVER_ERROR){
+    //Archive first handler's resposne
+    requestArchive.emplace(uri, response_status);
+
+    std::string chainedHandler = _handlerContainer[uri_prefix]->chainedHandler;
+    std::cout << "Calling chained handler: " << chainedHandler << std::endl;
+
+    for (auto it = pathToHandler.begin(); it != pathToHandler.end(); it++){
+      if (it->second == chainedHandler){
+        response_status = _handlerContainer[it->first]->HandleRequest((*httpRequest), httpResponse);
+        break;
+      }
+    }
+  }
+ 
 
   requestArchive.emplace(uri, response_status);
+  //Call chain handler if previous handler had successful response
+  
 
   std::size_t bytes_written;
   if (response_status != RequestHandler::SERVER_ERROR){ 
