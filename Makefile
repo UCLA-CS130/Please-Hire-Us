@@ -102,7 +102,7 @@ docker_deploy:
 	docker save -o httpserver-image httpserver
 	scp -i $(KEY_LOC) httpserver-image $(EC2_SERVER):~
 	rm httpserver-image
-	ssh -i $(KEY_LOC) $(EC2_SERVER) 'docker load -i httpserver-image; docker kill `docker ps -q`; docker run --rm -t -p 80:8080 httpserver; exit'
+	ssh -i $(KEY_LOC) $(EC2_SERVER) 'docker load -i httpserver-image; docker kill `docker ps -q`; docker run --rm -t -p 80:8008 httpserver; exit'
 
 docker_kill:
 	ssh -i $(KEY_LOC) $(EC2_SERVER) 'docker kill `docker ps -q`'
