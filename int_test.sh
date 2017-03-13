@@ -11,7 +11,7 @@ echo "Running server."
 sleep 2
 
 #Check for multithreading
-telnet localhost 8080 > /dev/null &
+telnet localhost 8008 > /dev/null &
 
 #Send message to server
 ACTUAL_MSG="$(curl -si http://localhost:8080/echo)"
