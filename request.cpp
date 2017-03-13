@@ -47,7 +47,9 @@ std::unique_ptr<Request> Request::Parse(const std::string& raw_request){
   
   std::size_t body_pos;
   body_pos = raw_request.find("\r\n\r\n");
-  req->_body = raw_request.substr(body_pos + 4);
+  
+  if (raw_request.size() > body_pos + 4)
+    req->_body = raw_request.substr(body_pos + 4);
   return req;
 }
 
