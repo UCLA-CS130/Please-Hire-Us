@@ -7,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include <unordered_map>
+#include "zlib.h"
 
 
 CompressionHandler::CompressionHandler(){}
@@ -15,6 +16,8 @@ RequestHandler::Status CompressionHandler::Init(const std::string& uri_prefix, c
   _uri_prefix = uri_prefix;
   _config = config;
 
+  //supportedCompression.insert("gzip");
+  supportedCompression.insert("deflate");
   return RequestHandler::OK;
 
 }
@@ -39,12 +42,15 @@ RequestHandler::Status CompressionHandler::HandleRequest(const Request& request,
       break;
     }
   }
- 
-  std::unordered_map<std::string, double> encodings = extractEncodings(encoding_str);
 
-  std::string final_encoding;
+  std::unordered_map<std::string, double>encodings;
+  extractEncodings(encoding_str, encodings);
+
+  
+  std::string final_encoding, compressed_data;
   double highest_weight = 0;
-  for (auto encodingIt = supportedEncodings.begin(); encodingIt != supportedEncodings.end(); encodingIt++){
+  for (auto encodingIt = supportedCompression.begin(); encodingIt != supportedCompression.end(); encodingIt++){
+    
     auto jt = encodings.find(*encodingIt);
     if (jt != encodings.end() && jt->second > highest_weight){
       highest_weight = jt->second;
@@ -56,19 +62,17 @@ RequestHandler::Status CompressionHandler::HandleRequest(const Request& request,
   if (final_encoding == ""){
     return RequestHandler::Status::OK;
   }
-
-  std::stringstream input_stream(response->GetBody());
-  std::stringstream output_stream;
-
-  boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
-  in.push( boost::iostreams::gzip_compressor());
-  in.push( input_stream);
-
-  boost::iostreams::copy(in, output_stream);
-  response->SetBody(output_stream.str());
+  
+  if (final_encoding == "gzip")
+    compressed_data = gzipCompress(response->GetBody());
+ 
+  else if (final_encoding == "deflate"){
+    compressed_data = deflateCompress(response->GetBody()); 
+  }
+  response->SetBody(compressed_data);
 
   response->AddHeader("Content-Type", "; charset=utf-8", /*append*/true);
-  response->AddHeader("Content-Encoding", "gzip");
+  response->AddHeader("Content-Encoding", final_encoding);
 
   std::string headers= response->ToString();
   std::size_t pos = headers.find("\r\n\r\n");
@@ -77,11 +81,39 @@ RequestHandler::Status CompressionHandler::HandleRequest(const Request& request,
   return RequestHandler::OK;
 }
 
-std::unordered_map<std::string, double> CompressionHandler::extractEncodings(const std::string& input){
+
+std::string CompressionHandler::gzipCompress(const std::string& data){
+ 
+  std::stringstream input_stream(data);
+  std::stringstream output_stream;
+
+  boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
+  in.push( boost::iostreams::gzip_compressor());
+  in.push( input_stream);
+
+  boost::iostreams::copy(in, output_stream);
+  return output_stream.str();
+}
+
+std::string CompressionHandler::deflateCompress(const std::string& data){
+ 
+  std::stringstream input_stream(data);
+  std::stringstream output_stream;
+
+  boost::iostreams::filtering_streambuf< boost::iostreams::input> in;
+  in.push( boost::iostreams::zlib_compressor());
+  in.push( input_stream);
+
+  boost::iostreams::copy(in, output_stream);
+  return output_stream.str();
+}
+
+
+
+void CompressionHandler::extractEncodings(const std::string& input, std::unordered_map<std::string,double>& encodings){
   std::size_t comma_pos = 0;
   std::size_t index = 0;
   std::size_t semicolon_pos = 0;
-  std::unordered_map<std::string, double> encodings;
   std::string next_en, full_en;
   std::string priority_str;
   std::size_t q_pos = input.find("q");
@@ -95,9 +127,11 @@ std::unordered_map<std::string, double> CompressionHandler::extractEncodings(con
       index = comma_pos + 2;
       priority -= 0.1;
     }
-
-    next_en = input.substr(index);
-    encodings.emplace(next_en, priority);
+   
+    next_en = input.substr(index, input.size() - index - 1);
+    std::pair<std::string, double> next(next_en, priority);
+    encodings.emplace(next);
+    return;
   }
 
   else {
@@ -130,7 +164,7 @@ std::unordered_map<std::string, double> CompressionHandler::extractEncodings(con
     encodings.emplace(next_en, atof(priority_str.c_str()));
   } 
 
-  return encodings;
+  return;
 }
 
 
