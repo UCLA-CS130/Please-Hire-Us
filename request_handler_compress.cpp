@@ -16,7 +16,7 @@ RequestHandler::Status CompressionHandler::Init(const std::string& uri_prefix, c
   _uri_prefix = uri_prefix;
   _config = config;
 
-  //supportedCompression.insert("gzip");
+  supportedCompression.insert("gzip");
   supportedCompression.insert("deflate");
   return RequestHandler::OK;
 
